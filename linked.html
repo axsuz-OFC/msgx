@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linked Devices - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Linked Devices</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">🔗 Connected Devices</div>
+        <div class="settings-item-sub">Manage devices linked to your MsGX account</div>
+        <div id="devicesList" style="margin-top:15px;"></div>
+    </div>
+
+    <button onclick="linkDevice()" class="settings-btn" style="margin-top:15px;">
+        📱 Link New Device
+    </button>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    renderDevices();
+});
+
+function renderDevices() {
+    const list = document.getElementById('devicesList');
+    const devices = ChatsStorage.getLinkedDevices();
+
+    if (devices.length === 0) {
+        list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No devices linked</p>';
+        return;
+    }
+
+    list.innerHTML = devices.map(d => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:10px;">
+            <div>
+                <div style="color:#fff;font-size:14px;font-weight:600;">📱 ${d.name}</div>
+                <div style="color:#8888bb;font-size:11px;margin-top:4px;">Linked: ${new Date(d.linkedAt).toLocaleString()}</div>
+            </div>
+            <button onclick="unlinkDevice(${d.id})" style="background:transparent;color:#ff3366;border:1px solid #ff3366;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;">Unlink</button>
+        </div>
+    `).join('');
+}
+
+function linkDevice() {
+    const name = prompt('Enter device name (e.g., "My Laptop"):');
+    if (!name) return;
+    ChatsStorage.linkDevice(name);
+    renderDevices();
+    alert('✅ Device linked!');
+}
+
+function unlinkDevice(id) {
+    if (confirm('Unlink this device?')) {
+        ChatsStorage.unlinkDevice(id);
+        renderDevices();
+        alert('✅ Device unlinked');
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Group - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>New Group</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">👥 Group Name</div>
+        <input type="text" id="groupName" placeholder="Enter group name" style="width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:15px;font-family:inherit;outline:none;margin-top:8px;">
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">👤 Select Members</div>
+        <div class="settings-item-sub">Choose contacts to add to the group</div>
+        <div id="memberList" style="max-height:400px;overflow-y:auto;margin-top:10px;"></div>
+    </div>
+
+    <button onclick="createGroup()" class="settings-btn" style="margin-top:15px;">✅ Create Group</button>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    renderMembers();
+});
+
+function renderMembers() {
+    const list = document.getElementById('memberList');
+    const contacts = ChatsStorage.getContacts().filter(c => !c.isGroup);
+
+    if (contacts.length === 0) {
+        list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No contacts available. Add contacts first!</p>';
+        return;
+    }
+
+    list.innerHTML = contacts.map(c => `
+        <label style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;cursor:pointer;">
+            <input type="checkbox" value="${c.id}" style="width:20px;height:20px;accent-color:#8800ff;cursor:pointer;">
+            <div class="chat-avatar" style="width:40px;height:40px;font-size:16px;background:${getAvatarColor(c.name)};">${c.name.charAt(0).toUpperCase()}</div>
+            <div>
+                <div style="color:#fff;font-size:14px;font-weight:600;">${c.name}</div>
+                <div style="color:#8888bb;font-size:11px;">${c.phone || 'No phone'}</div>
+            </div>
+        </label>
+    `).join('');
+}
+
+function getAvatarColor(name) {
+    const colors = [
+        'linear-gradient(135deg, #8800ff, #00aaff)',
+        'linear-gradient(135deg, #ff0080, #8800ff)',
+        'linear-gradient(135deg, #00aaff, #00ff88)',
+        'linear-gradient(135deg, #ff6600, #ff0080)',
+        'linear-gradient(135deg, #9c27b0, #00aaff)'
+    ];
+    return colors[name.charCodeAt(0) % colors.length];
+}
+
+function createGroup() {
+    const name = document.getElementById('groupName').value.trim();
+    if (!name) { alert('Please enter group name'); return; }
+
+    const checked = document.querySelectorAll('#memberList input:checked');
+    const members = Array.from(checked).map(c => c.value);
+
+    if (members.length === 0) { alert('Select at least one member'); return; }
+
+    ChatsStorage.addContact(name, '', true, members);
+    alert('✅ Group created!');
+    window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

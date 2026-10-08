@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Starred - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Starred Messages</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div id="starredList"></div>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    renderStarred();
+});
+
+function renderStarred() {
+    const list = document.getElementById('starredList');
+    const starred = ChatsStorage.getStarredMessages();
+
+    if (starred.length === 0) {
+        list.innerHTML = `
+            <div class="empty">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="#6666aa" width="70" height="70"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                </div>
+                <p>No starred messages</p>
+                <p style="font-size:12px;color:#6666aa;">Tap and hold a message to star it</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = starred.map(m => `
+        <div class="settings-item" onclick="window.location.href='chat.html?id=${m.contactId}'" style="cursor:pointer;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                <span style="color:#8800ff;font-size:12px;font-weight:600;">${m.contactName}</span>
+                <span style="color:#8888bb;font-size:11px;">${m.time}</span>
+            </div>
+            <div style="color:#fff;font-size:14px;line-height:1.5;">${m.text}</div>
+            <div style="margin-top:8px;">
+                <button onclick="event.stopPropagation(); unstar(${m.contactId}, ${m.id})" style="background:transparent;color:#ffaa00;border:1px solid #ffaa00;padding:4px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;">⭐ Unstar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function unstar(contactId, msgId) {
+    ChatsStorage.toggleStar(contactId, msgId);
+    renderStarred();
+}
+</script>
+
+</body>
+</html>
