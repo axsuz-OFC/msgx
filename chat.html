@@ -101,11 +101,10 @@ let voiceTimerInterval = null;
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
     const params = new URLSearchParams(window.location.search);
     contactId = params.get('id');
-
     if (!contactId) { window.location.href = 'index.html'; return; }
-
     contact = ChatsStorage.getContact(contactId);
     if (!contact) { window.location.href = 'index.html'; return; }
 
@@ -123,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emojiGrid = document.getElementById('emojiGrid');
     emojiGrid.innerHTML = EMOJIS.map(e => `<button onclick="insertEmoji('${e}')">${e}</button>`).join('');
 
-    loadChatWallpaper();
     renderMessages();
 });
 
@@ -136,30 +134,6 @@ function getAvatarColor(name) {
         'linear-gradient(135deg, #9c27b0, #00aaff)'
     ];
     return colors[name.charCodeAt(0) % colors.length];
-}
-
-function loadChatWallpaper() {
-    const wpType = localStorage.getItem('msgx_wallpaper_type');
-    const wpData = localStorage.getItem('msgx_wallpaper');
-    const chatView = document.getElementById('chatView');
-
-    if (!wpData) return;
-
-    if (wpType === 'video') {
-        chatView.style.background = '#0a0a1a';
-        const videoBg = document.createElement('video');
-        videoBg.src = wpData;
-        videoBg.autoplay = true;
-        videoBg.loop = true;
-        videoBg.muted = true;
-        videoBg.playsInline = true;
-        videoBg.className = 'chat-video-bg';
-        chatView.insertBefore(videoBg, chatView.firstChild);
-    } else if (wpType === 'image') {
-        chatView.style.backgroundImage = `url(${wpData})`;
-        chatView.style.backgroundSize = 'cover';
-        chatView.style.backgroundPosition = 'center';
-    }
 }
 
 function toggleEmojiPicker() {
@@ -178,41 +152,29 @@ async function startVoiceRecord() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
-
         mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
         mediaRecorder.onstop = () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
             const reader = new FileReader();
             reader.onload = (ev) => {
-                const extra = {
-                    fileName: 'voice_' + Date.now() + '.webm',
-                    fileSize: (audioBlob.size / 1024).toFixed(1) + ' KB',
-                    fileData: ev.target.result,
-                    duration: voiceSeconds
-                };
+                const extra = { fileName: 'voice_' + Date.now() + '.webm', fileSize: (audioBlob.size / 1024).toFixed(1) + ' KB', fileData: ev.target.result, duration: voiceSeconds };
                 ChatsStorage.addMessage(contactId, 'Voice Message', true, 'Me', 'voice', extra);
                 renderMessages();
             };
             reader.readAsDataURL(audioBlob);
             stream.getTracks().forEach(t => t.stop());
         };
-
         mediaRecorder.start();
         voiceSeconds = 0;
         document.getElementById('voiceRecording').classList.add('show');
         document.getElementById('voiceTimer').textContent = '00:00';
-
         voiceTimerInterval = setInterval(() => {
             voiceSeconds++;
             const mins = Math.floor(voiceSeconds / 60).toString().padStart(2, '0');
             const secs = (voiceSeconds % 60).toString().padStart(2, '0');
             document.getElementById('voiceTimer').textContent = `${mins}:${secs}`;
         }, 1000);
-
-    } catch (e) {
-        alert('Microphone permission needed!');
-    }
+    } catch (e) { alert('Microphone permission needed!'); }
 }
 
 function stopVoiceRecord() {
@@ -234,14 +196,8 @@ function handleInputChange() {
     const text = document.getElementById('msgInput').value.trim();
     const micBtn = document.getElementById('micBtn');
     const sendBtn = document.getElementById('sendBtn');
-
-    if (text.length > 0) {
-        micBtn.style.display = 'none';
-        sendBtn.style.display = 'flex';
-    } else {
-        micBtn.style.display = 'flex';
-        sendBtn.style.display = 'none';
-    }
+    if (text.length > 0) { micBtn.style.display = 'none'; sendBtn.style.display = 'flex'; }
+    else { micBtn.style.display = 'flex'; sendBtn.style.display = 'none'; }
 }
 
 function toggleAttachMenu() {
@@ -252,15 +208,7 @@ function toggleAttachMenu() {
 function attachFile(type) {
     document.getElementById('attachMenu').classList.remove('show');
     const input = document.getElementById('fileInput');
-
-    const acceptTypes = {
-        'audio': 'audio/*',
-        'video': 'video/*',
-        'image': 'image/*',
-        'document': '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx',
-        'contact': 'text/vcard,.vcf'
-    };
-
+    const acceptTypes = { 'audio': 'audio/*', 'video': 'video/*', 'image': 'image/*', 'document': '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx', 'contact': 'text/vcard,.vcf' };
     input.accept = acceptTypes[type] || '*/*';
     input.onchange = (e) => handleFileSelect(e, type);
     input.click();
@@ -269,22 +217,15 @@ function attachFile(type) {
 function handleFileSelect(e, type) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (ev) => {
-        const extra = {
-            fileName: file.name,
-            fileSize: (file.size / 1024).toFixed(1) + ' KB',
-            fileData: ev.target.result
-        };
-
+        const extra = { fileName: file.name, fileSize: (file.size / 1024).toFixed(1) + ' KB', fileData: ev.target.result };
         let text = '';
         if (type === 'image') text = 'Photo';
         else if (type === 'video') text = 'Video';
         else if (type === 'audio') text = 'Audio';
         else if (type === 'document') text = 'Document';
         else if (type === 'contact') text = 'Contact';
-
         ChatsStorage.addMessage(contactId, text, true, 'Me', type, extra);
         renderMessages();
         input.value = '';
@@ -306,15 +247,9 @@ function sendPoll() {
     const opt1 = document.getElementById('pollOption1').value.trim();
     const opt2 = document.getElementById('pollOption2').value.trim();
     const opt3 = document.getElementById('pollOption3').value.trim();
-
-    if (!question || !opt1 || !opt2) {
-        alert('Please fill question and at least 2 options');
-        return;
-    }
-
+    if (!question || !opt1 || !opt2) { alert('Please fill question and at least 2 options'); return; }
     const options = [opt1, opt2];
     if (opt3) options.push(opt3);
-
     const extra = { options: options, votes: options.map(() => 0) };
     ChatsStorage.addMessage(contactId, question, true, 'Me', 'poll', extra);
     closeModal('pollModal');
@@ -324,146 +259,29 @@ function sendPoll() {
 function renderMessages() {
     const container = document.getElementById('chatMessages');
     const messages = ChatsStorage.getMessages(contactId);
-
     if (messages.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center;color:#6666aa;font-size:12px;padding:20px;">
-                Messages are end-to-end encrypted
-            </div>
-        `;
+        container.innerHTML = `<div style="text-align:center;color:#6666aa;font-size:12px;padding:20px;">Messages are end-to-end encrypted</div>`;
         return;
     }
-
     container.innerHTML = messages.map(m => {
         let content = '';
-
-        if (m.type === 'image') {
-            content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;" onclick="window.open('${m.extra.fileData}','_blank')">`;
-        } else if (m.type === 'video') {
-            content = `<video src="${m.extra.fileData}" controls style="max-width:100%;border-radius:10px;margin-bottom:5px;"></video>`;
-        } else if (m.type === 'voice' || m.type === 'audio') {
-            content = `
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor;flex-shrink:0;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                    <audio src="${m.extra.fileData}" controls style="max-width:200px;"></audio>
-                </div>
-            `;
-        } else if (m.type === 'document' || m.type === 'contact') {
-            content = `
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:currentColor;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                    <div>
-                        <div style="font-weight:600;">${m.extra.fileName}</div>
-                        <div style="font-size:11px;opacity:0.7;">${m.extra.fileSize}</div>
-                    </div>
-                </div>
-            `;
-        } else if (m.type === 'poll') {
-            content = `
-                <div style="font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                    ${m.text}
-                </div>
-                ${m.extra.options.map((opt, i) => `
-                    <div onclick="votePoll(${m.id}, ${i})" style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px;">
-                        ${opt} <span style="float:right;opacity:0.7;">${m.extra.votes[i]} votes</span>
-                    </div>
-                `).join('')}
-            `;
-        } else {
-            content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${m.text}`;
-        }
-
-        return `
-            <div class="msg ${m.sent ? 'sent' : 'received'}" data-msg-id="${m.id}">
-                ${content}
-                <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span>
-            </div>
-        `;
+        if (m.type === 'image') content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;">`;
+        else if (m.type === 'video') content = `<video src="${m.extra.fileData}" controls style="max-width:100%;border-radius:10px;margin-bottom:5px;"></video>`;
+        else if (m.type === 'voice' || m.type === 'audio') content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor;flex-shrink:0;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg><audio src="${m.extra.fileData}" controls style="max-width:200px;"></audio></div>`;
+        else if (m.type === 'document' || m.type === 'contact') content = `<div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:currentColor;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><div><div style="font-weight:600;">${m.extra.fileName}</div><div style="font-size:11px;opacity:0.7;">${m.extra.fileSize}</div></div></div>`;
+        else if (m.type === 'poll') content = `<div style="font-weight:600;margin-bottom:8px;">${m.text}</div>${m.extra.options.map((opt, i) => `<div onclick="votePoll(${m.id}, ${i})" style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px;">${opt} <span style="float:right;opacity:0.7;">${m.extra.votes[i]} votes</span></div>`).join('')}`;
+        else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${m.text}`;
+        return `<div class="msg ${m.sent ? 'sent' : 'received'}" data-msg-id="${m.id}">${content}<span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span></div>`;
     }).join('');
-
     container.scrollTop = container.scrollHeight;
-
-    document.querySelectorAll('.msg').forEach(el => {
-        let timer;
-        el.addEventListener('touchstart', () => {
-            timer = setTimeout(() => openMsgMenu(parseInt(el.dataset.msgId)), 600);
-        });
-        el.addEventListener('touchend', () => clearTimeout(timer));
-        el.addEventListener('touchmove', () => clearTimeout(timer));
-        el.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            openMsgMenu(parseInt(el.dataset.msgId));
-        });
-    });
 }
 
 function votePoll(msgId, optionIndex) {
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === msgId);
     if (!msg || msg.type !== 'poll') return;
-
     msg.extra.votes[optionIndex]++;
     ChatsStorage.saveMessages(contactId, msgs);
-    renderMessages();
-}
-
-// ===== MESSAGE MENU (Star, Copy, Delete) =====
-function openMsgMenu(msgId) {
-    const msgs = ChatsStorage.getMessages(contactId);
-    const msg = msgs.find(m => m.id === msgId);
-    if (!msg) return;
-
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.id = 'msgMenuModal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2>Message Options</h2>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="toggleStarMsg(${msgId})" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    ${msg.starred ? 'Unstar' : 'Star'} Message
-                </button>
-                <button onclick="copyMsg(${msgId})" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                    Copy Text
-                </button>
-                <button onclick="deleteMsg(${msgId})" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Delete Message
-                </button>
-                <button onclick="closeModal('msgMenuModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Cancel</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function toggleStarMsg(msgId) {
-    ChatsStorage.toggleStar(contactId, msgId);
-    closeModal('msgMenuModal');
-    renderMessages();
-}
-
-function copyMsg(msgId) {
-    const msgs = ChatsStorage.getMessages(contactId);
-    const msg = msgs.find(m => m.id === msgId);
-    if (!msg) return;
-
-    const text = msg.text || 'Message';
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Copied: ' + text);
-        closeModal('msgMenuModal');
-    }).catch(() => {
-        alert('Copy failed');
-    });
-}
-
-function deleteMsg(msgId) {
-    if (!confirm('Delete this message?')) return;
-    ChatsStorage.deleteMessage(contactId, msgId);
-    closeModal('msgMenuModal');
     renderMessages();
 }
 
@@ -471,12 +289,10 @@ function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (!text) return;
-
     ChatsStorage.addMessage(contactId, text, true);
     input.value = '';
     handleInputChange();
     renderMessages();
-
     setTimeout(() => {
         const replies = ['Hi!', 'How are you?', 'Okay', 'Thanks!', 'Sure!', 'Got it', 'See you soon!'];
         const reply = replies[Math.floor(Math.random() * replies.length)];
@@ -485,23 +301,14 @@ function sendMessage() {
     }, 1200);
 }
 
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('show');
-    if (modal && modal.parentNode) modal.remove();
-}
+function closeModal(id) { const modal = document.getElementById(id); if (modal) modal.classList.remove('show'); }
 
 document.addEventListener('click', (e) => {
     const attachMenu = document.getElementById('attachMenu');
     const emojiPicker = document.getElementById('emojiPicker');
-    if (attachMenu && !e.target.closest('.chat-input-bar') && !e.target.closest('.attach-menu')) {
-        attachMenu.classList.remove('show');
-    }
-    if (emojiPicker && !e.target.closest('.chat-input-bar') && !e.target.closest('.emoji-picker')) {
-        emojiPicker.classList.remove('show');
-    }
+    if (attachMenu && !e.target.closest('.chat-input-bar') && !e.target.closest('.attach-menu')) attachMenu.classList.remove('show');
+    if (emojiPicker && !e.target.closest('.chat-input-bar') && !e.target.closest('.emoji-picker')) emojiPicker.classList.remove('show');
 });
 </script>
-
 </body>
 </html>

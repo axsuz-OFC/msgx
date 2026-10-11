@@ -23,13 +23,13 @@
 <script src="js/chats.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
     renderStarred();
 });
 
 function renderStarred() {
     const list = document.getElementById('starredList');
     const starred = ChatsStorage.getStarredMessages();
-
     if (starred.length === 0) {
         list.innerHTML = `
             <div class="empty">
@@ -42,7 +42,6 @@ function renderStarred() {
         `;
         return;
     }
-
     list.innerHTML = starred.map(m => `
         <div class="settings-item" onclick="window.location.href='chat.html?id=${m.contactId}'" style="cursor:pointer;">
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
@@ -51,7 +50,7 @@ function renderStarred() {
             </div>
             <div style="color:#fff;font-size:14px;line-height:1.5;">${m.text}</div>
             <div style="margin-top:8px;">
-                <button onclick="event.stopPropagation(); unstar(${m.contactId}, ${m.id})" style="background:transparent;color:#ffaa00;border:1px solid #ffaa00;padding:4px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;">⭐ Unstar</button>
+                <button onclick="event.stopPropagation(); unstar(${m.contactId}, ${m.id})" style="background:transparent;color:#ffaa00;border:1px solid #ffaa00;padding:4px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;">Unstar</button>
             </div>
         </div>
     `).join('');
@@ -62,6 +61,5 @@ function unstar(contactId, msgId) {
     renderStarred();
 }
 </script>
-
 </body>
 </html>

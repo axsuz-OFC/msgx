@@ -49,6 +49,7 @@
 <script src="js/chats.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
     renderRecipients();
     renderBroadcasts();
 });
@@ -56,12 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderRecipients() {
     const list = document.getElementById('recipientList');
     const contacts = ChatsStorage.getContacts().filter(c => !c.isGroup);
-
     if (contacts.length === 0) {
         list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No contacts available</p>';
         return;
     }
-
     list.innerHTML = contacts.map(c => `
         <label style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;cursor:pointer;">
             <input type="checkbox" value="${c.id}" style="width:20px;height:20px;accent-color:#8800ff;cursor:pointer;">
@@ -74,12 +73,10 @@ function renderRecipients() {
 function renderBroadcasts() {
     const list = document.getElementById('broadcastList');
     const broadcasts = ChatsStorage.getBroadcasts();
-
     if (broadcasts.length === 0) {
         list.innerHTML = '<p style="color:#6666aa;font-size:12px;text-align:center;padding:15px;">No broadcast lists yet</p>';
         return;
     }
-
     list.innerHTML = broadcasts.map(b => `
         <div class="settings-item">
             <div class="settings-item-title">
@@ -94,17 +91,13 @@ function renderBroadcasts() {
 function createBroadcast() {
     const name = document.getElementById('broadcastName').value.trim();
     if (!name) { alert('Please enter list name'); return; }
-
     const checked = document.querySelectorAll('#recipientList input:checked');
     const members = Array.from(checked).map(c => c.value);
-
     if (members.length === 0) { alert('Select at least one recipient'); return; }
-
     ChatsStorage.addBroadcast(name, members);
     alert('Broadcast list created!');
     window.location.href = 'index.html';
 }
 </script>
-
 </body>
 </html>

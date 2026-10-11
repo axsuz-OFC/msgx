@@ -8,113 +8,53 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="index.html" class="logo">
-        <img src="images/logo.jpg" alt="MsGX" class="logo-img" onerror="this.style.display='none'">
-        <span class="logo-text">𝐌𝐒𝐆𝐗</span>
-    </a>
-    <div class="nav-links">
-        <a href="#" onclick="openAddContact();return false;">➕ 𝐀𝐝𝐝</a>
-        <a href="settings.html">⚙️</a>
+<header class="app-bar">
+    <h1>MsGX</h1>
+    <div class="app-bar-actions">
+        <button onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></button>
     </div>
-</nav>
+</header>
+
+<div class="tabs">
+    <button class="tab active"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>Chats</button>
+    <button class="tab" onclick="window.location.href='status.html'"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>Status</button>
+    <button class="tab" onclick="window.location.href='calls.html'"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Calls</button>
+</div>
 
 <main class="container">
-    <div class="section-title"><h2>💬 𝐂𝐇𝐀𝐓𝐒</h2></div>
+    <div class="section-title">Chats</div>
     <div class="chat-list" id="chatList"></div>
 </main>
 
-<div id="footer"></div>
-
-<div class="music-bar" id="musicBar">
-    <div class="music-line">
-        <div class="music-title" id="musicTitle">🎵 𝐌𝐬𝐆𝐗 𝐌𝐮𝐬𝐢𝐜</div>
-        <div class="music-progress"></div>
-    </div>
-    <button class="music-btn-play" id="musicPlayBtn">▶</button>
-    <button class="music-btn-stop" id="musicStopBtn">■</button>
-</div>
-
 <nav class="bottom-nav" id="bottomNav"></nav>
-
-<!-- Add Contact Modal -->
-<div class="topup-modal" id="addModal">
-    <div class="topup-content">
-        <div class="topup-icon">➕</div>
-        <h2>𝐀𝐝𝐝 𝐂𝐨𝐧𝐭𝐚𝐜𝐭</h2>
-        <input type="text" id="contactName" placeholder="Contact Name" style="width:100%;padding:14px;margin-bottom:12px;background:#000;border:1px solid #00ff88;border-radius:10px;color:#fff;font-family:'Courier New',monospace;font-size:14px;">
-        <input type="text" id="contactPhone" placeholder="Phone Number" style="width:100%;padding:14px;margin-bottom:12px;background:#000;border:1px solid #00ff88;border-radius:10px;color:#fff;font-family:'Courier New',monospace;font-size:14px;">
-        <button onclick="saveContact()">💾 𝐒𝐚𝐯𝐞</button>
-        <button class="topup-skip" onclick="closeAddContact()">𝐂𝐚𝐧𝐜𝐞𝐥</button>
-    </div>
-</div>
 
 <script src="js/chats.js"></script>
 <script src="js/app.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    renderBottomNav();
     renderChatList();
-    
-    // Check URL for add=true
-    if (window.location.search.includes('add=true')) {
-        setTimeout(() => openAddContact(), 500);
-    }
 });
 
 function renderChatList() {
     const list = document.getElementById('chatList');
     const contacts = ChatsStorage.getContacts();
-    
     if (contacts.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state" style="text-align:center;padding:60px 20px;color:#666;">
-                <div style="font-size:60px;margin-bottom:15px;opacity:0.5;">💬</div>
-                <p>𝐍𝐨 𝐜𝐡𝐚𝐭𝐬 𝐲𝐞𝐭<br>
-                <a href="#" onclick="openAddContact();return false;" style="color:#00ff88;">Add your first contact!</a></p>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty"><p>No chats yet</p></div>`;
         return;
     }
-    
     list.innerHTML = contacts.map(c => {
         const lastMsg = ChatsStorage.getLastMessage(c.id) || 'Tap to start chatting...';
         const time = ChatsStorage.getLastTime(c.id) || '';
         return `
             <a href="chat.html?id=${c.id}" class="chat-item">
-                <div class="chat-avatar">${c.name.charAt(0).toUpperCase()}</div>
-                <div class="chat-info">
-                    <div class="chat-name">${c.name}</div>
-                    <div class="chat-preview">${lastMsg.substring(0, 30)}</div>
-                </div>
-                <div class="chat-time">${time}</div>
+                <div class="chat-avatar" style="background:linear-gradient(135deg, #8800ff, #00aaff)">${c.name.charAt(0).toUpperCase()}</div>
+                <div class="chat-body"><div class="chat-top"><span class="chat-name">${c.name}</span><span class="chat-time">${time}</span></div><div class="chat-bottom"><span class="chat-preview">${lastMsg.substring(0, 30)}</span></div></div>
             </a>
         `;
     }).join('');
 }
-
-function openAddContact() {
-    document.getElementById('addModal').classList.add('show');
-}
-
-function closeAddContact() {
-    document.getElementById('addModal').classList.remove('show');
-}
-
-function saveContact() {
-    const name = document.getElementById('contactName').value.trim();
-    const phone = document.getElementById('contactPhone').value.trim();
-    
-    if (!name) {
-        alert('Please enter a name!');
-        return;
-    }
-    
-    const contact = ChatsStorage.addContact(name, phone);
-    closeAddContact();
-    renderChatList();
-    alert('✅ Contact added!');
-}
 </script>
-
 </body>
 </html>
