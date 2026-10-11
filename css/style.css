@@ -1048,10 +1048,10 @@ body {
     background-attachment: fixed;
 }
 /* ===== EMOJI PICKER ===== */
-.emoji-picker { position: fixed; bottom: 70px; left: 12px; right: 12px; background: #1a0a2e; border: 1px solid rgba(136,0,255,0.4); border-radius: 16px; padding: 12px; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 30px rgba(136,0,255,0.4); z-index: 1000; display: none; animation: attachIn 0.2s ease; }
+.emoji-picker { position: fixed; bottom: 70px; left: 12px; right: 12px; background: #1a0a2e; border: 1px solid rgba(136,0,255,0.4); border-radius: 16px; padding: 12px; max-height: 250px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 30px rgba(136,0,255,0.4); z-index: 1000; display: none; }
 .emoji-picker.show { display: block; }
 .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
-.emoji-grid button { background: none; border: none; font-size: 22px; padding: 5px; cursor: pointer; border-radius: 8px; transition: background 0.2s; }
+.emoji-grid button { background: none; border: none; font-size: 22px; padding: 5px; cursor: pointer; border-radius: 8px; }
 .emoji-grid button:active { background: rgba(136,0,255,0.3); }
 .chat-input-bar .emoji-btn { width: 40px; height: 40px; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .chat-input-bar .emoji-btn svg { width: 24px; height: 24px; fill: #8800ff; }
@@ -1059,15 +1059,14 @@ body {
 .chat-input-bar .mic-btn svg { width: 22px; height: 22px; fill: #fff; }
 
 /* ===== ATTACH MENU ===== */
-.attach-menu { position: fixed; bottom: 70px; left: 12px; background: #1a0a2e; border: 1px solid rgba(136,0,255,0.4); border-radius: 16px; padding: 10px 0; min-width: 200px; box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 30px rgba(136,0,255,0.4); z-index: 1000; display: none; animation: attachIn 0.2s ease; }
+.attach-menu { position: fixed; bottom: 70px; left: 12px; background: #1a0a2e; border: 1px solid rgba(136,0,255,0.4); border-radius: 16px; padding: 10px 0; min-width: 200px; box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 30px rgba(136,0,255,0.4); z-index: 1000; display: none; }
 .attach-menu.show { display: block; }
-@keyframes attachIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.attach-menu button { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 20px; background: none; border: none; color: #fff; font-size: 14px; font-family: inherit; text-align: left; cursor: pointer; transition: background 0.2s; }
+.attach-menu button { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 20px; background: none; border: none; color: #fff; font-size: 14px; font-family: inherit; text-align: left; cursor: pointer; }
 .attach-menu button:hover, .attach-menu button:active { background: rgba(136,0,255,0.15); }
 .attach-menu button svg { width: 22px; height: 22px; fill: #8800ff; flex-shrink: 0; }
 .attach-menu button:not(:last-child) { border-bottom: 1px solid rgba(136,0,255,0.1); }
 
-/* ===== VOICE RECORDING UI ===== */
+/* ===== VOICE RECORDING ===== */
 .voice-recording { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20,10,40,0.98); backdrop-filter: blur(20px); border-top: 1px solid rgba(136,0,255,0.3); padding: 15px; z-index: 1001; display: none; align-items: center; gap: 15px; }
 .voice-recording.show { display: flex; }
 .voice-indicator { width: 14px; height: 14px; border-radius: 50%; background: #ff3366; box-shadow: 0 0 15px #ff3366; animation: voicePulse 1s ease-in-out infinite; flex-shrink: 0; }
