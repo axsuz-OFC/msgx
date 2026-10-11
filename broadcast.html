@@ -18,19 +18,48 @@
 
 <main class="container">
     <div class="settings-item">
-        <div class="settings-item-title">📢 List Name</div>
+        <div class="settings-item-title">
+            <!-- SVG: Megaphone -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8800ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:5px;">
+                <path d="M3 11l18-5v12L3 14v-3z"></path>
+                <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+            </svg>
+            List Name
+        </div>
         <input type="text" id="broadcastName" placeholder="Enter list name" style="width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:15px;font-family:inherit;outline:none;margin-top:8px;">
     </div>
 
     <div class="settings-item">
-        <div class="settings-item-title">👥 Select Recipients</div>
+        <div class="settings-item-title">
+            <!-- SVG: Users -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8800ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:5px;">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Select Recipients
+        </div>
         <div class="settings-item-sub">Choose who receives the broadcast</div>
         <div id="recipientList" style="max-height:400px;overflow-y:auto;margin-top:10px;"></div>
     </div>
 
-    <button onclick="createBroadcast()" class="settings-btn" style="margin-top:15px;">✅ Create Broadcast List</button>
+    <button onclick="createBroadcast()" class="settings-btn" style="margin-top:15px; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <!-- SVG: Checkmark -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Create Broadcast List
+    </button>
 
-    <div class="section-title" style="margin-top:30px;">📋 My Broadcast Lists</div>
+    <div class="section-title" style="margin-top:30px;">
+        <!-- SVG: Clipboard -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+        My Broadcast Lists
+    </div>
     <div id="broadcastList"></div>
 </main>
 
@@ -70,7 +99,14 @@ function renderBroadcasts() {
 
     list.innerHTML = broadcasts.map(b => `
         <div class="settings-item">
-            <div class="settings-item-title">📢 ${b.name}</div>
+            <div class="settings-item-title">
+                <!-- SVG: Megaphone (small) -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8800ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:5px;">
+                    <path d="M3 11l18-5v12L3 14v-3z"></path>
+                    <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+                </svg>
+                ${b.name}
+            </div>
             <div class="settings-item-sub">${b.members.length} recipients</div>
         </div>
     `).join('');
@@ -97,7 +133,7 @@ function createBroadcast() {
     if (members.length === 0) { alert('Select at least one recipient'); return; }
 
     ChatsStorage.addBroadcast(name, members);
-    alert('✅ Broadcast list created!');
+    alert('Broadcast list created!'); // Emoji එක අයින් කළා
     window.location.href = 'index.html';
 }
 </script>
