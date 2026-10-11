@@ -65,6 +65,18 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGlobalWallpaper();
     renderBottomNav();
     renderCalls();
+
+    // Auto-start call from URL params (from chat.html)
+    const params = new URLSearchParams(window.location.search);
+    const callId = params.get('call');
+    const callType = params.get('type') || 'audio';
+    if (callId) {
+        const c = ChatsStorage.getContact(callId);
+        if (c) {
+            currentCallContact = c;
+            setTimeout(() => showCallScreen(c, callType), 300);
+        }
+    }
 });
 
 function renderCalls() {
@@ -81,7 +93,9 @@ function renderCalls() {
             </div>
         </div>`).join('');
 }
+
 function getAvatarColor(name) { const colors = ['linear-gradient(135deg, #8800ff, #00aaff)','linear-gradient(135deg, #ff0080, #8800ff)','linear-gradient(135deg, #00aaff, #00ff88)','linear-gradient(135deg, #ff6600, #ff0080)','linear-gradient(135deg, #9c27b0, #00aaff)']; return colors[name.charCodeAt(0) % colors.length]; }
+
 function startNewCall() {
     const picker = document.getElementById('contactPicker');
     const contacts = ChatsStorage.getContacts();
@@ -89,6 +103,7 @@ function startNewCall() {
     else { picker.innerHTML = contacts.map(c => `<div onclick="openContactCallOptions('${c.id}')" style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;cursor:pointer;"><div class="chat-avatar" style="width:40px;height:40px;font-size:16px;background:${getAvatarColor(c.name)};">${c.name.charAt(0).toUpperCase()}</div><div style="color:#fff;font-size:14px;font-weight:600;">${c.name}</div></div>`).join(''); }
     document.getElementById('startCallModal').classList.add('show');
 }
+
 function openContactCallOptions(contactId) {
     closeModal('startCallModal');
     const c = ChatsStorage.getContact(contactId);
@@ -98,8 +113,10 @@ function openContactCallOptions(contactId) {
     modal.innerHTML = `<div class="modal-content"><h2>${c.name}</h2><p style="color:#8888bb;font-size:12px;margin-bottom:20px;text-align:center;">${c.phone || 'No phone number'}</p><div style="display:flex;flex-direction:column;gap:10px;"><button onclick="startAudioCall('${contactId}')" style="padding:14px;background:rgba(0,170,255,0.15);color:#00aaff;border:1px solid #00aaff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Voice Call</button><button onclick="startVideoCall('${contactId}')" style="padding:14px;background:rgba(136,0,255,0.15);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Video Call</button><button onclick="closeModal('callOptionsModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Cancel</button></div></div>`;
     document.body.appendChild(modal);
 }
-function startAudioCall(contactId) { closeModal('callOptionsModal'); closeModal('startCallModal'); const c = ChatsStorage.getContact(contactId); if (!c) return; currentCallContact = c; showCallScreen(c, 'voice'); }
+
+function startAudioCall(contactId) { closeModal('callOptionsModal'); closeModal('startCallModal'); const c = ChatsStorage.getContact(contactId); if (!c) return; currentCallContact = c; showCallScreen(c, 'audio'); }
 function startVideoCall(contactId) { closeModal('callOptionsModal'); closeModal('startCallModal'); const c = ChatsStorage.getContact(contactId); if (!c) return; currentCallContact = c; showCallScreen(c, 'video'); }
+
 function showCallScreen(contact, type) {
     document.getElementById('callAvatar').textContent = contact.name.charAt(0).toUpperCase();
     document.getElementById('callAvatar').style.background = getAvatarColor(contact.name);
@@ -110,8 +127,19 @@ function showCallScreen(contact, type) {
     callSeconds = 0; isMuted = false; isSpeaker = false;
     setTimeout(() => { document.getElementById('callStatus').textContent = 'Connecting...'; setTimeout(() => { document.getElementById('callStatus').textContent = 'Connected'; startCallTimer(); }, 2000); }, 1500);
 }
+
 function startCallTimer() { if (callTimerInterval) clearInterval(callTimerInterval); callTimerInterval = setInterval(() => { callSeconds++; const mins = Math.floor(callSeconds / 60).toString().padStart(2, '0'); const secs = (callSeconds % 60).toString().padStart(2, '0'); document.getElementById('callTimer').textContent = `${mins}:${secs}`; }, 1000); }
-function endCall() { if (callTimerInterval) clearInterval(callTimerInterval); document.getElementById('callScreen').classList.remove('show'); currentCallContact = null; callSeconds = 0; alert('Call ended'); }
+
+function endCall() { 
+    if (callTimerInterval) clearInterval(callTimerInterval); 
+    document.getElementById('callScreen').classList.remove('show'); 
+    currentCallContact = null; 
+    callSeconds = 0; 
+    alert('Call ended'); 
+    // Remove URL params so refresh doesn't restart call
+    window.history.replaceState({}, document.title, 'calls.html');
+}
+
 function toggleMute() { isMuted = !isMuted; document.querySelector('.call-btn.mute').style.background = isMuted ? '#ff3366' : 'rgba(255,255,255,0.15)'; alert(isMuted ? 'Muted' : 'Unmuted'); }
 function toggleSpeaker() { isSpeaker = !isSpeaker; alert(isSpeaker ? 'Speaker ON' : 'Speaker OFF'); }
 function closeModal(id) { const modal = document.getElementById(id); if (modal) modal.classList.remove('show'); }
