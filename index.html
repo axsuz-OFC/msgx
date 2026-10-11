@@ -4,45 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#8800ff">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MsGX">
 <title>MsGX</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="images/icon-192.jpg">
 <link rel="stylesheet" href="css/style.css">
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-            .then(reg => console.log('SW registered'))
-            .catch(err => console.log('SW failed:', err));
-    });
-}
-</script>
 </head>
 <body>
 
-<div class="install-popup" id="installPopup">
-    <div class="install-content">
-        <div class="install-icon">
-            <svg viewBox="0 0 24 24" fill="#8800ff" width="60" height="60"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-        </div>
-        <h2>Add MsGX to Home Screen</h2>
-        <p>Install MsGX for quick access and a full-screen app experience.</p>
-        <div class="install-buttons">
-            <button class="install-btn-yes" onclick="installApp()">
-                <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                Install
-            </button>
-            <button class="install-btn-no" onclick="dismissInstall()">
-                Not Now
-            </button>
-        </div>
-    </div>
-</div>
-
+<!-- Splash -->
 <div class="splash" id="splash">
     <div class="splash-logo">
         <svg viewBox="0 0 24 24" fill="#8800ff" width="90" height="90"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
@@ -52,11 +20,12 @@ if ('serviceWorker' in navigator) {
     <div class="splash-loader"></div>
 </div>
 
+<!-- App -->
 <div id="app" style="display:none;">
     <header class="app-bar">
         <h1>MsGX</h1>
         <div class="app-bar-actions">
-            <button onclick="openSearch()" aria-label="Search">
+            <button onclick="window.location.href='search.html'" aria-label="Search">
                 <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             </button>
             <button onclick="toggleMenu()" aria-label="Menu">
@@ -65,6 +34,7 @@ if ('serviceWorker' in navigator) {
         </div>
     </header>
 
+    <!-- Dropdown Menu (Fixed Links) -->
     <div class="dropdown-menu" id="dropdownMenu">
         <a href="new-group.html" class="menu-link">
             <svg viewBox="0 0 24 24" class="menu-icon"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -96,8 +66,9 @@ if ('serviceWorker' in navigator) {
         </a>
     </div>
 
+    <!-- Tabs (Fixed) -->
     <div class="tabs">
-        <button class="tab active">
+        <button class="tab active" onclick="window.location.href='index.html'">
             <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
             Chats
         </button>
@@ -120,6 +91,7 @@ if ('serviceWorker' in navigator) {
     <nav class="bottom-nav" id="bottomNav"></nav>
 </div>
 
+<!-- Add Contact Modal -->
 <div class="modal" id="addModal">
     <div class="modal-content">
         <h2>New Contact</h2>
@@ -145,46 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGlobalWallpaper();
 });
 
-let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    setTimeout(() => {
-        if (deferredPrompt && !localStorage.getItem('msgx_install_dismissed')) {
-            document.getElementById('installPopup').classList.add('show');
-        }
-    }, 5000);
-});
-
-function installApp() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted install');
-            }
-            deferredPrompt = null;
-            document.getElementById('installPopup').classList.remove('show');
-        });
-    } else {
-        alert('To install:\n\n1. Tap Chrome menu\n2. Tap "Add to Home screen"\n3. Tap "Add"');
-        document.getElementById('installPopup').classList.remove('show');
-    }
-}
-
-function dismissInstall() {
-    document.getElementById('installPopup').classList.remove('show');
-    localStorage.setItem('msgx_install_dismissed', 'true');
-}
-
 setTimeout(() => {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     renderChats();
     renderBottomNav();
-}, 2000);
+}, 1500);
 
 document.getElementById('wallpaperInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -199,24 +137,15 @@ document.getElementById('wallpaperInput').addEventListener('change', (e) => {
     reader.readAsDataURL(file);
 });
 
-function changeWallpaper() {
-    document.getElementById('wallpaperInput').click();
-}
+function changeWallpaper() { document.getElementById('wallpaperInput').click(); }
+function toggleMenu() { document.getElementById('dropdownMenu').classList.toggle('show'); }
 
 function renderChats() {
     const list = document.getElementById('chatList');
     const contacts = ChatsStorage.getContacts();
 
     if (contacts.length === 0) {
-        list.innerHTML = `
-            <div class="empty">
-                <div class="empty-icon">
-                    <svg viewBox="0 0 24 24" fill="#6666aa" width="70" height="70"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-                </div>
-                <p>No chats yet</p>
-                <button onclick="openAddContact()">Start New Chat</button>
-            </div>
-        `;
+        list.innerHTML = `<div class="empty"><p>No chats yet</p><button onclick="openAddContact()">Start New Chat</button></div>`;
         return;
     }
 
@@ -226,52 +155,15 @@ function renderChats() {
         const preview = lastMsg ? lastMsg.text : 'Tap to start chatting';
         const time = lastMsg ? lastMsg.time : '';
         const unread = msgs.filter(m => !m.sent && !m.read).length;
-        const icon = c.isGroup ? 
-            '<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#fff;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>' 
-            : c.name.charAt(0).toUpperCase();
-
         return `
-            <a href="chat.html?id=${c.id}" class="chat-item" data-contact-id="${c.id}">
-                <div class="chat-avatar" style="background:${getAvatarColor(c.name)}">
-                    ${icon}
-                </div>
+            <a href="chat.html?id=${c.id}" class="chat-item">
+                <div class="chat-avatar" style="background:linear-gradient(135deg, #8800ff, #00aaff)">${c.name.charAt(0).toUpperCase()}</div>
                 <div class="chat-body">
-                    <div class="chat-top">
-                        <span class="chat-name">${c.name} ${c.isGroup ? '<span style="color:#8800ff;font-size:10px;">(Group)</span>' : ''}</span>
-                        <span class="chat-time">${time}</span>
-                    </div>
-                    <div class="chat-bottom">
-                        <span class="chat-preview">${preview}</span>
-                        ${unread > 0 ? `<span class="chat-badge">${unread}</span>` : ''}
-                    </div>
+                    <div class="chat-top"><span class="chat-name">${c.name}</span><span class="chat-time">${time}</span></div>
+                    <div class="chat-bottom"><span class="chat-preview">${preview}</span>${unread > 0 ? `<span class="chat-badge">${unread}</span>` : ''}</div>
                 </div>
-            </a>
-        `;
+            </a>`;
     }).join('');
-
-    document.querySelectorAll('.chat-item').forEach(el => {
-        let timer;
-        el.addEventListener('touchstart', () => {
-            timer = setTimeout(() => openChatMenu(el.dataset.contactId), 600);
-        });
-        el.addEventListener('touchend', () => clearTimeout(timer));
-        el.addEventListener('touchmove', () => clearTimeout(timer));
-        el.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            openChatMenu(el.dataset.contactId);
-        });
-    });
-}
-
-function getAvatarColor(name) {
-    const colors = [
-        'linear-gradient(135deg, #8800ff, #00aaff)',
-        'linear-gradient(135deg, #ff0080, #8800ff)',
-        'linear-gradient(135deg, #00aaff, #00ff88)',
-        'linear-gradient(135deg, #ff6600, #ff0080)',
-        'linear-gradient(135deg, #9c27b0, #00aaff)'
-    ];
-    return colors[name.charCodeAt(0) % colors.length];
 }
 
 function openAddContact() { document.getElementById('addModal').classList.add('show'); }
@@ -288,14 +180,6 @@ function saveContact() {
     document.getElementById('contactPhone').value = '';
 }
 
-function openSearch() {
-    window.location.href = 'search.html';
-}
-
-function toggleMenu() {
-    document.getElementById('dropdownMenu').classList.toggle('show');
-}
-
 function markAllRead() {
     document.getElementById('dropdownMenu').classList.remove('show');
     const contacts = ChatsStorage.getContacts();
@@ -308,85 +192,9 @@ function markAllRead() {
     alert('All messages marked as read');
 }
 
-function openChatMenu(contactId) {
-    const contact = ChatsStorage.getContact(contactId);
-    if (!contact) return;
-
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.id = 'chatMenuModal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2>${contact.name}</h2>
-            <p style="color:#8888bb;font-size:12px;margin-bottom:20px;text-align:center;">
-                ${contact.isGroup ? 'Group Chat' : (contact.phone || 'No phone number')}
-            </p>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="openChat(${contactId})" style="padding:14px;background:linear-gradient(135deg,#8800ff,#00aaff);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                    Open Chat
-                </button>
-                <button onclick="markChatRead(${contactId})" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>
-                    Mark as Read
-                </button>
-                <button onclick="clearChatMessages(${contactId})" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Clear Messages
-                </button>
-                <button onclick="deleteChat(${contactId})" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Delete Contact
-                </button>
-                <button onclick="closeModal('chatMenuModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">
-                    Cancel
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function openChat(contactId) { window.location.href = 'chat.html?id=' + contactId; }
-
-function markChatRead(contactId) {
-    const msgs = ChatsStorage.getMessages(contactId);
-    msgs.forEach(m => m.read = true);
-    ChatsStorage.saveMessages(contactId, msgs);
-    closeModal('chatMenuModal');
-    renderChats();
-    alert('Chat marked as read');
-}
-
-function clearChatMessages(contactId) {
-    if (confirm('Clear all messages in this chat?')) {
-        ChatsStorage.clearMessages(contactId);
-        closeModal('chatMenuModal');
-        renderChats();
-        alert('Messages cleared');
-    }
-}
-
-function deleteChat(contactId) {
-    if (confirm('Delete this contact and all messages?')) {
-        ChatsStorage.deleteContact(contactId);
-        closeModal('chatMenuModal');
-        renderChats();
-        alert('Contact deleted');
-    }
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('show');
-    if (modal && modal.parentNode) modal.remove();
-}
-
 document.addEventListener('click', (e) => {
     const menu = document.getElementById('dropdownMenu');
-    if (menu && !e.target.closest('.app-bar')) {
-        menu.classList.remove('show');
-    }
+    if (menu && !e.target.closest('.app-bar')) menu.classList.remove('show');
 });
 </script>
 
