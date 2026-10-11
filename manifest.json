@@ -1,0 +1,25 @@
+{
+    "name": "MsGX - Feature Messaging",
+    "short_name": "MsGX",
+    "description": "Feature Messaging App - WhatsApp style",
+    "start_url": "/msgx/index.html",
+    "scope": "/msgx/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0a0a1a",
+    "theme_color": "#8800ff",
+    "icons": [
+        {
+            "src": "images/icon-192.jpg",
+            "sizes": "192x192",
+            "type": "image/jpeg",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "images/icon-512.jpg",
+            "sizes": "512x512",
+            "type": "image/jpeg",
+            "purpose": "any maskable"
+        }
+    ]
+}
