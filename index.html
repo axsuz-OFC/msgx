@@ -137,6 +137,14 @@ if ('serviceWorker' in navigator) {
 <script src="js/chats.js"></script>
 <script src="js/app.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (!ChatsStorage.isLoggedIn()) {
+        window.location.href = 'login.html';
+        return;
+    }
+    loadGlobalWallpaper();
+});
+
 let deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -176,34 +184,7 @@ setTimeout(() => {
     document.getElementById('app').style.display = 'block';
     renderChats();
     renderBottomNav();
-    loadWallpaper();
 }, 2000);
-
-function loadWallpaper() {
-    const wpType = localStorage.getItem('msgx_wallpaper_type');
-    const wpData = localStorage.getItem('msgx_wallpaper');
-
-    if (!wpData) return;
-
-    const existing = document.querySelector('.chat-video-bg');
-    if (existing) existing.remove();
-
-    if (wpType === 'video') {
-        const videoBg = document.createElement('video');
-        videoBg.src = wpData;
-        videoBg.autoplay = true;
-        videoBg.loop = true;
-        videoBg.muted = true;
-        videoBg.playsInline = true;
-        videoBg.className = 'chat-video-bg';
-        document.body.insertBefore(videoBg, document.body.firstChild);
-    } else {
-        document.body.style.backgroundImage = `url(${wpData})`;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-        document.body.style.backgroundAttachment = 'fixed';
-    }
-}
 
 document.getElementById('wallpaperInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -212,7 +193,7 @@ document.getElementById('wallpaperInput').addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
         ChatsStorage.saveWallpaper(ev.target.result, isVideo ? 'video' : 'image');
-        loadWallpaper();
+        loadGlobalWallpaper();
         alert('Wallpaper updated!');
     };
     reader.readAsDataURL(file);

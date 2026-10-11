@@ -1,4 +1,45 @@
 const ChatsStorage = {
+    // ===== USERS (ACCOUNTS) =====
+    getUsers: () => JSON.parse(localStorage.getItem('msgx_users') || '[]'),
+    saveUsers: (u) => localStorage.setItem('msgx_users', JSON.stringify(u)),
+    
+    registerUser: (username, email, password) => {
+        const users = ChatsStorage.getUsers();
+        if (users.find(u => u.email === email)) {
+            return { success: false, message: 'Email already exists!' };
+        }
+        if (users.find(u => u.username === username)) {
+            return { success: false, message: 'Username already taken!' };
+        }
+        const user = {
+            id: Date.now(),
+            username,
+            email,
+            password,
+            createdAt: new Date().toISOString()
+        };
+        users.push(user);
+        ChatsStorage.saveUsers(users);
+        return { success: true, user };
+    },
+    
+    loginUser: (email, password) => {
+        const users = ChatsStorage.getUsers();
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+            localStorage.setItem('msgx_current_user', JSON.stringify(user));
+            return { success: true, user };
+        }
+        return { success: false, message: 'Invalid email or password!' };
+    },
+    
+    logoutUser: () => {
+        localStorage.removeItem('msgx_current_user');
+    },
+    
+    getCurrentUser: () => JSON.parse(localStorage.getItem('msgx_current_user') || 'null'),
+    isLoggedIn: () => !!localStorage.getItem('msgx_current_user'),
+    
     // ===== CONTACTS =====
     getContacts: () => JSON.parse(localStorage.getItem('msgx_contacts') || '[]'),
     saveContacts: (c) => localStorage.setItem('msgx_contacts', JSON.stringify(c)),
@@ -164,7 +205,7 @@ const ChatsStorage = {
         ChatsStorage.saveStatuses(active);
     },
     
-    // ===== WALLPAPER (Image + Video) =====
+    // ===== WALLPAPER =====
     getWallpaper: () => localStorage.getItem('msgx_wallpaper'),
     getWallpaperType: () => localStorage.getItem('msgx_wallpaper_type') || 'image',
     saveWallpaper: (base64, type = 'image') => {
@@ -176,3 +217,32 @@ const ChatsStorage = {
         localStorage.removeItem('msgx_wallpaper_type');
     }
 };
+
+// ===== GLOBAL WALLPAPER LOADER =====
+function loadGlobalWallpaper() {
+    const wpType = localStorage.getItem('msgx_wallpaper_type');
+    const wpData = localStorage.getItem('msgx_wallpaper');
+
+    const existing = document.querySelector('.global-video-bg');
+    if (existing) existing.remove();
+
+    document.body.style.backgroundImage = '';
+
+    if (!wpData) return;
+
+    if (wpType === 'video') {
+        const videoBg = document.createElement('video');
+        videoBg.src = wpData;
+        videoBg.autoplay = true;
+        videoBg.loop = true;
+        videoBg.muted = true;
+        videoBg.playsInline = true;
+        videoBg.className = 'global-video-bg';
+        document.body.insertBefore(videoBg, document.body.firstChild);
+    } else {
+        document.body.style.backgroundImage = `url(${wpData})`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundAttachment = 'fixed';
+    }
+}

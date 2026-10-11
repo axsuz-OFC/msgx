@@ -34,23 +34,16 @@
 
 <main class="container">
     <div class="profile-card">
-        <div class="profile-avatar-big" id="avatarBig">P</div>
-        <div class="profile-name">Pramod Adithya</div>
-        <div class="profile-phone">+94 70 453 6039</div>
-        <div style="margin-top:20px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-            <button onclick="changeLogo()" class="settings-btn" style="width:auto;padding:10px 20px;display:inline-flex;align-items:center;gap:6px;">
-                <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                Logo
-            </button>
-            <button onclick="changeMusic()" class="settings-btn" style="width:auto;padding:10px 20px;display:inline-flex;align-items:center;gap:6px;">
-                <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-                Music
-            </button>
-        </div>
+        <div class="profile-avatar-big" id="avatarBig">U</div>
+        <div class="profile-name" id="profileName">User</div>
+        <div class="profile-phone" id="profileEmail">user@msgx.com</div>
     </div>
 
     <div class="settings-item">
-        <div class="settings-item-title">Wallpaper</div>
+        <div class="settings-item-title">
+            <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            Wallpaper
+        </div>
         <div class="settings-item-sub" id="wallpaperInfo">Change chat background</div>
         <div style="display:flex;gap:8px;margin-top:10px;">
             <button onclick="changeWallpaperImage()" class="settings-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
@@ -61,140 +54,4 @@
                 <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
                 Video
             </button>
-            <button onclick="resetWallpaper()" class="settings-btn danger" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-                Reset
-            </button>
-        </div>
-    </div>
-
-    <div class="settings-item">
-        <div class="settings-item-title">About MsGX</div>
-        <div class="settings-item-sub">Version 1.0 • Feature Messaging</div>
-    </div>
-
-    <div class="settings-item">
-        <div class="settings-item-title">Privacy</div>
-        <div class="settings-item-sub">End-to-end encrypted messages</div>
-    </div>
-
-    <div class="settings-item">
-        <div class="settings-item-title">Music</div>
-        <div class="settings-item-sub" id="musicInfo">No custom music</div>
-    </div>
-
-    <div class="settings-item">
-        <div class="settings-item-title">Logo</div>
-        <div class="settings-item-sub" id="logoInfo">Default logo</div>
-    </div>
-
-    <div class="settings-item" style="border-color:rgba(255,50,100,0.4);">
-        <div class="settings-item-title" style="color:#ff3366;">Reset All Data</div>
-        <div class="settings-item-sub">This will delete all chats and status</div>
-        <button onclick="resetAll()" class="settings-btn danger">Reset Everything</button>
-    </div>
-
-    <p style="text-align:center;margin-top:25px;font-size:11px;color:#6666aa;line-height:2;">
-        MsGX • Created by <span style="color:#8800ff;">AXsUZ-OFC</span><br>
-        Owner: Pramod Adithya • +94704536039
-    </p>
-</main>
-
-<nav class="bottom-nav" id="bottomNav"></nav>
-
-<input type="file" id="logoInput" accept="image/*" style="display:none;">
-<input type="file" id="musicInput" accept="audio/*" style="display:none;">
-<input type="file" id="wallpaperImageInput" accept="image/*" style="display:none;">
-<input type="file" id="wallpaperVideoInput" accept="video/*" style="display:none;">
-
-<script src="js/chats.js"></script>
-<script src="js/app.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    renderBottomNav();
-
-    const logo = localStorage.getItem('msgx_logo');
-    if (logo) document.getElementById('logoInfo').textContent = 'Custom logo';
-
-    const music = localStorage.getItem('msgx_music');
-    if (music) document.getElementById('musicInfo').textContent = 'Custom music';
-
-    const wp = ChatsStorage.getWallpaper();
-    const wpType = ChatsStorage.getWallpaperType();
-    if (wp) {
-        document.getElementById('wallpaperInfo').textContent = 
-            wpType === 'video' ? 'Custom video wallpaper' : 'Custom image wallpaper';
-    }
-});
-
-function changeLogo() { document.getElementById('logoInput').click(); }
-function changeMusic() { document.getElementById('musicInput').click(); }
-function changeWallpaperImage() { document.getElementById('wallpaperImageInput').click(); }
-function changeWallpaperVideo() { document.getElementById('wallpaperVideoInput').click(); }
-
-document.getElementById('logoInput').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        localStorage.setItem('msgx_logo', ev.target.result);
-        alert('Logo updated!');
-        location.reload();
-    };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('musicInput').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        localStorage.setItem('msgx_music', ev.target.result);
-        alert('Music updated!');
-        location.reload();
-    };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('wallpaperImageInput').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        ChatsStorage.saveWallpaper(ev.target.result, 'image');
-        alert('Image wallpaper updated!');
-        location.reload();
-    };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('wallpaperVideoInput').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        ChatsStorage.saveWallpaper(ev.target.result, 'video');
-        alert('Video wallpaper updated!');
-        location.reload();
-    };
-    reader.readAsDataURL(file);
-});
-
-function resetWallpaper() {
-    if (confirm('Reset wallpaper?')) {
-        ChatsStorage.resetWallpaper();
-        alert('Wallpaper reset!');
-        location.reload();
-    }
-}
-
-function resetAll() {
-    if (confirm('Reset everything? All chats, status and settings will be deleted!')) {
-        localStorage.clear();
-        alert('Reset complete!');
-        window.location.href = 'index.html';
-    }
-}
-</script>
-
-</body>
-</html>
+            <
