@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="settings.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Notifications</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">Message Notifications</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Show message notifications</span>
+            <input type="checkbox" id="msgNotif" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Group Notifications</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Show group notifications</span>
+            <input type="checkbox" id="grpNotif" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Call Notifications</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Show call notifications</span>
+            <input type="checkbox" id="callNotif" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Vibration</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Vibrate on notification</span>
+            <input type="checkbox" id="vibrate" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Sound</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Play sound on notification</span>
+            <input type="checkbox" id="sound" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <button onclick="saveNotifications()" class="settings-btn" style="margin-top:15px;">Save Notification Settings</button>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    const n = JSON.parse(localStorage.getItem('msgx_notifications') || '{}');
+    document.getElementById('msgNotif').checked = n.msgNotif !== false;
+    document.getElementById('grpNotif').checked = n.grpNotif !== false;
+    document.getElementById('callNotif').checked = n.callNotif !== false;
+    document.getElementById('vibrate').checked = n.vibrate !== false;
+    document.getElementById('sound').checked = n.sound !== false;
+});
+
+function saveNotifications() {
+    const n = {
+        msgNotif: document.getElementById('msgNotif').checked,
+        grpNotif: document.getElementById('grpNotif').checked,
+        callNotif: document.getElementById('callNotif').checked,
+        vibrate: document.getElementById('vibrate').checked,
+        sound: document.getElementById('sound').checked
+    };
+    localStorage.setItem('msgx_notifications', JSON.stringify(n));
+    alert('Notification settings saved!');
+}
+</script>
+</body>
+</html>

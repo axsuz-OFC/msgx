@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="settings.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Help</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">Frequently Asked Questions</div>
+        <div style="margin-top:12px;">
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-q">How do I create a broadcast list?</div>
+                <div class="faq-a">Go to Menu → Broadcast lists → Enter name → Select recipients → Create.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-q">How do I change my wallpaper?</div>
+                <div class="faq-a">Go to Settings → Wallpaper → Choose Image or Video.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-q">How do I link a device?</div>
+                <div class="faq-a">Go to Settings → Linked Devices → Link New Device.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-q">How do I star a message?</div>
+                <div class="faq-a">Long press a message → Tap Star Message.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Contact Us</div>
+        <div class="settings-item-sub">Get in touch with our team</div>
+        <a href="mailto:support@msgx.com" class="settings-btn" style="margin-top:10px;text-decoration:none;display:flex;">Email Support</a>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">About</div>
+        <div style="color:#8888bb;font-size:13px;line-height:1.6;margin-top:10px;">
+            <strong style="color:#fff;">MsGX</strong><br>
+            Version 1.0.0<br>
+            Feature Messaging App<br>
+            © 2026 MsGX
+        </div>
+    </div>
+</main>
+
+<style>
+.faq-item { padding: 12px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+.faq-q { color: #fff; font-size: 14px; font-weight: 600; }
+.faq-a { color: #8888bb; font-size: 12px; margin-top: 8px; display: none; line-height: 1.5; }
+.faq-item.open .faq-a { display: block; }
+</style>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+});
+
+function toggleFaq(el) {
+    el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

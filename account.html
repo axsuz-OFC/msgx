@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="settings.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Account</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">Account Info</div>
+        <div class="settings-item-sub">Your account details</div>
+        <div id="accountInfo" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Security</div>
+        <div class="settings-item-sub">Security notifications</div>
+        <button class="settings-btn" style="margin-top:10px;" onclick="toggleSecurity()" id="securityBtn">Enable Security Notifications</button>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Change Password</div>
+        <div class="settings-item-sub">Update your password</div>
+        <input type="password" id="newPassword" placeholder="New password" style="width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:15px;outline:none;margin-top:10px;">
+        <button class="settings-btn" style="margin-top:10px;" onclick="changePassword()">Change Password</button>
+    </div>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    const user = ChatsStorage.getCurrentUser();
+    if (user) {
+        document.getElementById('accountInfo').innerHTML = `
+            <div style="color:#fff;font-size:14px;margin-bottom:8px;"><strong>Name:</strong> ${user.name || user.username}</div>
+            <div style="color:#fff;font-size:14px;margin-bottom:8px;"><strong>Username:</strong> @${user.username}</div>
+            <div style="color:#fff;font-size:14px;margin-bottom:8px;"><strong>Email:</strong> ${user.email}</div>
+            <div style="color:#fff;font-size:14px;"><strong>Phone:</strong> ${user.phone || 'Not set'}</div>
+        `;
+    }
+    const sec = localStorage.getItem('msgx_security_notif') === 'true';
+    document.getElementById('securityBtn').textContent = sec ? 'Disable Security Notifications' : 'Enable Security Notifications';
+});
+
+function toggleSecurity() {
+    const sec = localStorage.getItem('msgx_security_notif') === 'true';
+    localStorage.setItem('msgx_security_notif', !sec);
+    document.getElementById('securityBtn').textContent = !sec ? 'Disable Security Notifications' : 'Enable Security Notifications';
+    alert(!sec ? 'Security notifications enabled' : 'Security notifications disabled');
+}
+
+function changePassword() {
+    const np = document.getElementById('newPassword').value;
+    if (np.length < 4) { alert('Password must be at least 4 characters'); return; }
+    const user = ChatsStorage.getCurrentUser();
+    user.password = np;
+    localStorage.setItem('msgx_current_user', JSON.stringify(user));
+    const users = ChatsStorage.getUsers();
+    const idx = users.findIndex(u => u.id === user.id);
+    if (idx >= 0) { users[idx].password = np; ChatsStorage.saveUsers(users); }
+    document.getElementById('newPassword').value = '';
+    alert('Password changed!');
+}
+</script>
+</body>
+</html>

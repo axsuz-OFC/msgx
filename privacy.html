@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="settings.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Privacy</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">Last Seen</div>
+        <div class="settings-item-sub">Who can see when you were last online</div>
+        <select id="lastSeen" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-top:10px;">
+            <option value="everyone">Everyone</option>
+            <option value="contacts">My Contacts</option>
+            <option value="nobody">Nobody</option>
+        </select>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Profile Photo</div>
+        <div class="settings-item-sub">Who can see your profile photo</div>
+        <select id="profilePhoto" style="width:100%;padding:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-top:10px;">
+            <option value="everyone">Everyone</option>
+            <option value="contacts">My Contacts</option>
+            <option value="nobody">Nobody</option>
+        </select>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Read Receipts</div>
+        <div class="settings-item-sub">Show blue ticks when you read messages</div>
+        <label style="display:flex;align-items:center;gap:12px;margin-top:10px;cursor:pointer;">
+            <input type="checkbox" id="readReceipts" style="width:20px;height:20px;accent-color:#8800ff;">
+            <span style="color:#fff;font-size:14px;">Enable Read Receipts</span>
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Blocked Contacts</div>
+        <div class="settings-item-sub">Manage blocked users</div>
+        <div id="blockedList" style="margin-top:12px;"></div>
+    </div>
+
+    <button onclick="savePrivacy()" class="settings-btn" style="margin-top:15px;">Save Privacy Settings</button>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    const p = JSON.parse(localStorage.getItem('msgx_privacy') || '{}');
+    if (p.lastSeen) document.getElementById('lastSeen').value = p.lastSeen;
+    if (p.profilePhoto) document.getElementById('profilePhoto').value = p.profilePhoto;
+    document.getElementById('readReceipts').checked = p.readReceipts !== false;
+    renderBlocked();
+});
+
+function renderBlocked() {
+    const blocked = JSON.parse(localStorage.getItem('msgx_blocked') || '[]');
+    const list = document.getElementById('blockedList');
+    if (blocked.length === 0) { list.innerHTML = '<p style="color:#6666aa;font-size:12px;">No blocked contacts</p>'; return; }
+    list.innerHTML = blocked.map(b => `<div style="display:flex;justify-content:space-between;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;margin-bottom:6px;"><span style="color:#fff;font-size:13px;">${b}</span><button onclick="unblock('${b}')" style="background:transparent;color:#ff3366;border:none;cursor:pointer;font-size:12px;">Unblock</button></div>`).join('');
+}
+
+function unblock(name) {
+    let blocked = JSON.parse(localStorage.getItem('msgx_blocked') || '[]');
+    blocked = blocked.filter(b => b !== name);
+    localStorage.setItem('msgx_blocked', JSON.stringify(blocked));
+    renderBlocked();
+}
+
+function savePrivacy() {
+    const p = {
+        lastSeen: document.getElementById('lastSeen').value,
+        profilePhoto: document.getElementById('profilePhoto').value,
+        readReceipts: document.getElementById('readReceipts').checked
+    };
+    localStorage.setItem('msgx_privacy', JSON.stringify(p));
+    alert('Privacy settings saved!');
+}
+</script>
+</body>
+</html>

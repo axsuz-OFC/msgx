@@ -1,183 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Settings - MsGX</title>
-<link rel="stylesheet" href="css/style-v2.css">
-</head>
-<body>
-
-<header class="app-bar">
-    <h1>Settings</h1>
-    <div class="app-bar-actions">
-        <button onclick="window.location.href='index.html'">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-        </button>
-    </div>
-</header>
-
-<main class="container">
-
-    <!-- Profile Card -->
-    <div class="profile-card" onclick="openEditProfile()">
-        <div class="profile-avatar-big" id="avatarBig">U</div>
-        <div class="profile-name" id="profileName">User</div>
-        <div class="profile-username" id="profileUsername">@user</div>
-        <div class="profile-edit-hint">Tap to edit profile</div>
-    </div>
-
-    <!-- Settings List -->
-    <div class="settings-list">
-
-        <div class="settings-row" onclick="openAccountSettings()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Account</div>
-                <div class="settings-row-sub">Security notifications, change number</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="openPrivacySettings()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Privacy</div>
-                <div class="settings-row-sub">Blocked accounts, disappearing messages</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="window.location.href='broadcast.html'">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M4 18v-6h6v6H4zm16 0h-6v-6h6v6zM4 10V4h6v6H4zm16 0h-6V4h6v6z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Broadcasts</div>
-                <div class="settings-row-sub">Manage lists and send broadcasts</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="window.location.href='linked.html'">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Linked Devices</div>
-                <div class="settings-row-sub">Manage connected devices</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="window.location.href='starred.html'">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Starred Messages</div>
-                <div class="settings-row-sub">View your starred messages</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="changeWallpaper()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Wallpaper</div>
-                <div class="settings-row-sub" id="wallpaperInfo">Change chat background</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="openNotifications()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Notifications</div>
-                <div class="settings-row-sub">Message, group &amp; call tones</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="openStorage()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Storage and Data</div>
-                <div class="settings-row-sub">Network usage, auto-download</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-        <div class="settings-row" onclick="openHelp()">
-            <div class="settings-row-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-            </div>
-            <div class="settings-row-text">
-                <div class="settings-row-title">Help</div>
-                <div class="settings-row-sub">Help center, contact us, privacy policy</div>
-            </div>
-            <div class="settings-row-arrow">
-                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-            </div>
-        </div>
-
-    </div>
-
-    <button onclick="logout()" class="settings-btn danger" style="margin-top:20px;">Logout</button>
-
-</main>
-
-<!-- Edit Profile Modal -->
-<div class="modal" id="editProfileModal">
-    <div class="modal-content">
-        <h2>Edit Profile</h2>
-        <div style="text-align:center;margin-bottom:15px;">
-            <div class="profile-avatar-big" id="editAvatar" style="width:80px;height:80px;font-size:32px;cursor:pointer;" onclick="document.getElementById('profilePhotoInput').click()">U</div>
-            <p style="color:#8888bb;font-size:11px;margin-top:8px;">Tap to change photo</p>
-        </div>
-        <input type="text" id="editName" placeholder="Name">
-        <input type="text" id="editUsername" placeholder="Username">
-        <input type="email" id="editEmail" placeholder="Email">
-        <input type="text" id="editPhone" placeholder="Phone (optional)">
-        <div class="modal-buttons">
-            <button class="btn-cancel" onclick="closeModal('editProfileModal')">Cancel</button>
-            <button class="btn-save" onclick="saveProfile()">Save</button>
-        </div>
-    </div>
-</div>
-
-<input type="file" id="wallpaperImageInput" accept="image/*" style="display:none;">
-<input type="file" id="wallpaperVideoInput" accept="video/*" style="display:none;">
-<input type="file" id="profilePhotoInput" accept="image/*" style="display:none;">
-
-<nav class="bottom-nav" id="bottomNav"></nav>
-
 <script src="js/chats.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -199,7 +19,6 @@ function renderProfile() {
         document.getElementById('profileName').textContent = user.name || user.username;
         document.getElementById('profileUsername').textContent = '@' + user.username;
     }
-    // Profile photo
     const photo = localStorage.getItem('msgx_profile_photo');
     if (photo) {
         const av = document.getElementById('avatarBig');
@@ -259,23 +78,18 @@ function saveProfile() {
     user.phone = phone;
     localStorage.setItem('msgx_current_user', JSON.stringify(user));
 
-    // Update users list
     const users = ChatsStorage.getUsers();
     const idx = users.findIndex(u => u.id === user.id);
     if (idx >= 0) { users[idx] = user; ChatsStorage.saveUsers(users); }
 
-    if (selectedPhoto) {
-        localStorage.setItem('msgx_profile_photo', selectedPhoto);
-    }
+    if (selectedPhoto) localStorage.setItem('msgx_profile_photo', selectedPhoto);
 
     closeModal('editProfileModal');
     renderProfile();
     alert('Profile updated!');
 }
 
-function changeWallpaper() {
-    document.getElementById('wallpaperImageInput').click();
-}
+function changeWallpaper() { document.getElementById('wallpaperImageInput').click(); }
 
 document.getElementById('wallpaperImageInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -290,11 +104,11 @@ document.getElementById('wallpaperImageInput').addEventListener('change', (e) =>
     reader.readAsDataURL(file);
 });
 
-function openAccountSettings() { alert('Account settings coming soon'); }
-function openPrivacySettings() { alert('Privacy settings coming soon'); }
-function openNotifications() { alert('Notification settings coming soon'); }
-function openStorage() { alert('Storage settings coming soon'); }
-function openHelp() { alert('Help center coming soon'); }
+function openAccountSettings() { window.location.href = 'account.html'; }
+function openPrivacySettings() { window.location.href = 'privacy.html'; }
+function openNotifications() { window.location.href = 'notifications.html'; }
+function openStorage() { window.location.href = 'storage.html'; }
+function openHelp() { window.location.href = 'help.html'; }
 
 function logout() {
     if (confirm('Logout?')) {
@@ -302,8 +116,5 @@ function logout() {
         window.location.href = 'login.html';
     }
 }
-
 function closeModal(id) { const m = document.getElementById(id); if (m) m.classList.remove('show'); }
 </script>
-</body>
-</html>

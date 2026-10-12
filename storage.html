@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="settings.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Storage and Data</h1>
+    <div class="app-bar-actions"></div>
+</header>
+
+<main class="container">
+    <div class="settings-item">
+        <div class="settings-item-title">Storage Usage</div>
+        <div class="settings-item-sub">See how much space MsGX uses</div>
+        <div id="storageInfo" style="margin-top:12px;"></div>
+        <button onclick="calculateStorage()" class="settings-btn" style="margin-top:12px;">Calculate Storage</button>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Auto Download</div>
+        <div class="settings-item-sub">Choose what to auto-download</div>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Photos</span>
+            <input type="checkbox" id="dlPhotos" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Videos</span>
+            <input type="checkbox" id="dlVideos" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Audio</span>
+            <input type="checkbox" id="dlAudio" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+        <label style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;cursor:pointer;">
+            <span style="color:#fff;font-size:14px;">Documents</span>
+            <input type="checkbox" id="dlDocs" style="width:20px;height:20px;accent-color:#8800ff;">
+        </label>
+    </div>
+
+    <div class="settings-item">
+        <div class="settings-item-title">Clear Cache</div>
+        <div class="settings-item-sub">Free up space by clearing cache</div>
+        <button class="settings-btn danger" style="margin-top:12px;" onclick="clearCache()">Clear Cache</button>
+    </div>
+
+    <button onclick="saveStorageSettings()" class="settings-btn" style="margin-top:15px;">Save Settings</button>
+</main>
+
+<script src="js/chats.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    const s = JSON.parse(localStorage.getItem('msgx_storage') || '{}');
+    document.getElementById('dlPhotos').checked = s.dlPhotos !== false;
+    document.getElementById('dlVideos').checked = s.dlVideos !== false;
+    document.getElementById('dlAudio').checked = s.dlAudio !== false;
+    document.getElementById('dlDocs').checked = s.dlDocs !== false;
+    calculateStorage();
+});
+
+function calculateStorage() {
+    let total = 0;
+    for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key) && key.startsWith('msgx_')) {
+            total += (localStorage[key].length + key.length) * 2;
+        }
+    }
+    const kb = (total / 1024).toFixed(2);
+    const mb = (total / 1024 / 1024).toFixed(3);
+    document.getElementById('storageInfo').innerHTML = `
+        <div style="color:#fff;font-size:16px;font-weight:600;">${kb} KB (${mb} MB)</div>
+        <div style="color:#8888bb;font-size:11px;margin-top:4px;">Used by MsGX data</div>
+    `;
+}
+
+function saveStorageSettings() {
+    const s = {
+        dlPhotos: document.getElementById('dlPhotos').checked,
+        dlVideos: document.getElementById('dlVideos').checked,
+        dlAudio: document.getElementById('dlAudio').checked,
+        dlDocs: document.getElementById('dlDocs').checked
+    };
+    localStorage.setItem('msgx_storage', JSON.stringify(s));
+    alert('Storage settings saved!');
+}
+
+function clearCache() {
+    if (!confirm('Clear cache? This will remove wallpaper and temporary data (chats, contacts will not be affected).')) return;
+    localStorage.removeItem('msgx_wallpaper');
+    localStorage.removeItem('msgx_wallpaper_type');
+    alert('Cache cleared!');
+    window.location.reload();
+}
+</script>
+</body>
+</html>
