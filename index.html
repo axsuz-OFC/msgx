@@ -4,12 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#8800ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MsGX">
 <title>MsGX</title>
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="images/icon-192.jpg">
 <link rel="stylesheet" href="css/style.css">
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('SW registered'))
+            .catch(err => console.log('SW failed:', err));
+    });
+}
+</script>
 </head>
 <body>
 
+<!-- Install Popup -->
+<div class="install-popup" id="installPopup">
+    <div class="install-content">
+        <div class="install-icon">
+            <svg viewBox="0 0 24 24" fill="#8800ff" width="60" height="60"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+        </div>
+        <h2>Add MsGX to Home Screen</h2>
+        <p>Install MsGX for quick access and a full-screen app experience.</p>
+        <div class="install-buttons">
+            <button class="install-btn-yes" onclick="installApp()">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                Install
+            </button>
+            <button class="install-btn-no" onclick="dismissInstall()">
+                Not Now
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Splash -->
 <div class="splash" id="splash">
     <div class="splash-logo">
         <svg viewBox="0 0 24 24" fill="#8800ff" width="90" height="90"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
@@ -77,6 +112,39 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGlobalWallpaper();
 });
 
+// ===== INSTALL POPUP LOGIC =====
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => {
+        if (deferredPrompt && !localStorage.getItem('msgx_install_dismissed')) {
+            document.getElementById('installPopup').classList.add('show');
+        }
+    }, 5000);
+});
+
+function installApp() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') console.log('User accepted install');
+            deferredPrompt = null;
+            document.getElementById('installPopup').classList.remove('show');
+        });
+    } else {
+        alert('To install:\n\n1. Tap Chrome menu\n2. Tap "Add to Home screen"\n3. Tap "Add"');
+        document.getElementById('installPopup').classList.remove('show');
+    }
+}
+
+function dismissInstall() {
+    document.getElementById('installPopup').classList.remove('show');
+    localStorage.setItem('msgx_install_dismissed', 'true');
+}
+
+// ===== SPLASH =====
 setTimeout(() => {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -84,6 +152,7 @@ setTimeout(() => {
     renderBottomNav();
 }, 1500);
 
+// ===== WALLPAPER =====
 document.getElementById('wallpaperInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -100,6 +169,7 @@ document.getElementById('wallpaperInput').addEventListener('change', (e) => {
 function changeWallpaper() { document.getElementById('wallpaperInput').click(); }
 function toggleMenu() { document.getElementById('dropdownMenu').classList.toggle('show'); }
 
+// ===== CHAT RENDER =====
 function renderChats() {
     const list = document.getElementById('chatList');
     const contacts = ChatsStorage.getContacts();
