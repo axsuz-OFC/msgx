@@ -11,38 +11,9 @@
 <title>MsGX</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="images/icon-192.jpg">
-<link rel="stylesheet" href="css/style-v2.css">
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-            .then(reg => console.log('SW registered'))
-            .catch(err => console.log('SW failed:', err));
-    });
-}
-</script>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-<!-- Install Popup -->
-<div class="install-popup" id="installPopup">
-    <div class="install-content">
-        <div class="install-icon">
-            <svg viewBox="0 0 24 24" fill="#8800ff" width="60" height="60"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-        </div>
-        <h2>Add MsGX to Home Screen</h2>
-        <p>Install MsGX for quick access and a full-screen app experience.</p>
-        <div class="install-buttons">
-            <button class="install-btn-yes" onclick="installApp()">
-                <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                Install
-            </button>
-            <button class="install-btn-no" onclick="dismissInstall()">
-                Not Now
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Splash -->
 <div class="splash" id="splash">
@@ -111,38 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ChatsStorage.isLoggedIn()) { window.location.href = 'login.html'; return; }
     loadGlobalWallpaper();
 });
-
-// ===== INSTALL POPUP LOGIC =====
-let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    setTimeout(() => {
-        if (deferredPrompt && !localStorage.getItem('msgx_install_dismissed')) {
-            document.getElementById('installPopup').classList.add('show');
-        }
-    }, 5000);
-});
-
-function installApp() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') console.log('User accepted install');
-            deferredPrompt = null;
-            document.getElementById('installPopup').classList.remove('show');
-        });
-    } else {
-        alert('To install:\n\n1. Tap Chrome menu\n2. Tap "Add to Home screen"\n3. Tap "Add"');
-        document.getElementById('installPopup').classList.remove('show');
-    }
-}
-
-function dismissInstall() {
-    document.getElementById('installPopup').classList.remove('show');
-    localStorage.setItem('msgx_install_dismissed', 'true');
-}
 
 // ===== SPLASH =====
 setTimeout(() => {
