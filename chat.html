@@ -43,6 +43,16 @@
         </button>
     </div>
 
+    <div class="reply-input-preview" id="replyInputPreview">
+        <div class="reply-info">
+            <div class="r-name" id="replyName">Replying to</div>
+            <div class="r-text" id="replyText"></div>
+        </div>
+        <button class="close-reply" onclick="cancelReply()">
+            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+    </div>
+
     <div class="chat-input-bar" id="chatInputBar">
         <button class="emoji-btn" onclick="toggleEmojiPicker()">
             <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
@@ -95,6 +105,7 @@ let mediaRecorder = null;
 let audioChunks = [];
 let voiceSeconds = 0;
 let voiceTimerInterval = null;
+let replyToMsgId = null;
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
@@ -281,6 +292,18 @@ function renderMessages() {
 
     container.innerHTML = messages.map(m => {
         let content = '';
+        let quotedHtml = '';
+
+        if (m.replyTo) {
+            const repliedMsg = messages.find(x => x.id === m.replyTo);
+            if (repliedMsg) {
+                quotedHtml = `<div class="quoted-msg">
+                    <div class="q-name">${repliedMsg.sent ? 'You' : contact.name}</div>
+                    <div class="q-text">${formatText(repliedMsg.text || 'Message')}</div>
+                </div>`;
+            }
+        }
+
         if (m.type === 'image') content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;">`;
         else if (m.type === 'video') content = `<video src="${m.extra.fileData}" controls style="max-width:100%;border-radius:10px;margin-bottom:5px;"></video>`;
         else if (m.type === 'voice' || m.type === 'audio') content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor;flex-shrink:0;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg><audio src="${m.extra.fileData}" controls style="max-width:200px;"></audio></div>`;
@@ -289,9 +312,69 @@ function renderMessages() {
         else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${formatText(m.text)}`;
 
         const rgbClass = (rgbOn && m.type === 'text') ? 'rgb-active' : '';
-        return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">${content}<span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span></div>`;
+        return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">
+            ${quotedHtml}
+            ${content}
+            <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span>
+            <div class="reply-icon">
+                <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+            </div>
+        </div>`;
     }).join('');
     container.scrollTop = container.scrollHeight;
+
+    // Long press + swipe to reply
+    document.querySelectorAll('.msg').forEach(el => {
+        const msgId = parseInt(el.dataset.msgId);
+        let pressTimer, startX = 0, currentX = 0, isSwiping = false;
+
+        el.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            pressTimer = setTimeout(() => {
+                if (!isSwiping) openMsgMenu(msgId);
+            }, 600);
+        });
+
+        el.addEventListener('touchmove', (e) => {
+            currentX = e.touches[0].clientX - startX;
+            if (currentX > 40) {
+                isSwiping = true;
+                clearTimeout(pressTimer);
+                el.classList.add('swiping');
+            }
+        });
+
+        el.addEventListener('touchend', () => {
+            clearTimeout(pressTimer);
+            if (isSwiping && currentX > 60) {
+                setReply(msgId);
+            }
+            el.classList.remove('swiping');
+            isSwiping = false;
+            currentX = 0;
+        });
+
+        el.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            openMsgMenu(msgId);
+        });
+    });
+}
+
+function setReply(msgId) {
+    const messages = ChatsStorage.getMessages(contactId);
+    const msg = messages.find(m => m.id === msgId);
+    if (!msg) return;
+    replyToMsgId = msgId;
+    document.getElementById('replyName').textContent = msg.sent ? 'Replying to yourself' : 'Replying to ' + contact.name;
+    document.getElementById('replyText').textContent = (msg.text || 'Message').substring(0, 50);
+    document.getElementById('replyInputPreview').classList.add('show');
+    document.getElementById('msgInput').focus();
+}
+
+function cancelReply() {
+    replyToMsgId = null;
+    document.getElementById('replyInputPreview').classList.remove('show');
 }
 
 function formatText(text) {
@@ -321,10 +404,21 @@ function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (!text) return;
+
     ChatsStorage.addMessage(contactId, text, true);
+
+    if (replyToMsgId) {
+        const msgs = ChatsStorage.getMessages(contactId);
+        const lastMsg = msgs[msgs.length - 1];
+        lastMsg.replyTo = replyToMsgId;
+        ChatsStorage.saveMessages(contactId, msgs);
+        cancelReply();
+    }
+
     input.value = '';
     handleInputChange();
     renderMessages();
+
     setTimeout(() => {
         const replies = ['Hi!', 'How are you?', 'Okay', 'Thanks!', 'Sure!', 'Got it', 'See you soon!'];
         const reply = replies[Math.floor(Math.random() * replies.length)];
@@ -333,7 +427,72 @@ function sendMessage() {
     }, 1200);
 }
 
-function closeModal(id) { const modal = document.getElementById(id); if (modal) modal.classList.remove('show'); }
+function openMsgMenu(msgId) {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'msgMenuModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Message Options</h2>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button onclick="setReply(${msgId}); closeModal('msgMenuModal');" style="padding:14px;background:rgba(0,170,255,0.1);color:#00aaff;border:1px solid #00aaff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00aaff;"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+                    Reply
+                </button>
+                <button onclick="toggleStarMsg(${msgId})" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    ${msg.starred ? 'Unstar' : 'Star'} Message
+                </button>
+                <button onclick="copyMsg(${msgId})" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    Copy Text
+                </button>
+                <button onclick="deleteMsg(${msgId})" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    Delete Message
+                </button>
+                <button onclick="closeModal('msgMenuModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function toggleStarMsg(msgId) {
+    ChatsStorage.toggleStar(contactId, msgId);
+    closeModal('msgMenuModal');
+    renderMessages();
+}
+
+function copyMsg(msgId) {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg) return;
+    const text = msg.text || 'Message';
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied: ' + text);
+        closeModal('msgMenuModal');
+    }).catch(() => {
+        alert('Copy failed');
+    });
+}
+
+function deleteMsg(msgId) {
+    if (!confirm('Delete this message?')) return;
+    ChatsStorage.deleteMessage(contactId, msgId);
+    closeModal('msgMenuModal');
+    renderMessages();
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('show');
+    if (modal && modal.parentNode && id === 'msgMenuModal') modal.remove();
+}
 
 document.addEventListener('click', (e) => {
     const attachMenu = document.getElementById('attachMenu');
