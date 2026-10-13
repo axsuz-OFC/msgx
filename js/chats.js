@@ -29,7 +29,7 @@ const ChatsStorage = {
     saveContacts: (c) => localStorage.setItem('msgx_contacts', JSON.stringify(c)),
     addContact: (name, phone, isGroup = false, members = []) => {
         const contacts = ChatsStorage.getContacts();
-        const contact = { id: Date.now(), name, phone: phone || '', isGroup, members, createdAt: new Date().toISOString() };
+        const contact = { id: Date.now(), name, phone: phone || '', about: 'Hey there! I am using MsGX.', isGroup, members, createdAt: new Date().toISOString() };
         contacts.push(contact);
         ChatsStorage.saveContacts(contacts);
         return contact;
@@ -83,6 +83,48 @@ const ChatsStorage = {
         return msgs.length > 0 ? msgs[msgs.length - 1].time : '';
     },
     clearMessages: (contactId) => localStorage.removeItem('msgx_msgs_' + contactId),
+
+    // ===== CHAT STATE (Pin/Mute/Archive) =====
+    getChatState: (contactId) => {
+        const states = JSON.parse(localStorage.getItem('msgx_chat_states') || '{}');
+        return states[contactId] || { pinned: false, muted: false, archived: false };
+    },
+    setChatState: (contactId, state) => {
+        const states = JSON.parse(localStorage.getItem('msgx_chat_states') || '{}');
+        states[contactId] = { ...states[contactId], ...state };
+        localStorage.setItem('msgx_chat_states', JSON.stringify(states));
+    },
+    togglePin: (contactId) => {
+        const s = ChatsStorage.getChatState(contactId);
+        ChatsStorage.setChatState(contactId, { pinned: !s.pinned });
+    },
+    toggleMute: (contactId) => {
+        const s = ChatsStorage.getChatState(contactId);
+        ChatsStorage.setChatState(contactId, { muted: !s.muted });
+    },
+    toggleArchive: (contactId) => {
+        const s = ChatsStorage.getChatState(contactId);
+        ChatsStorage.setChatState(contactId, { archived: !s.archived });
+    },
+
+    // ===== BLOCK CONTACTS =====
+    isBlocked: (contactId) => {
+        const blocked = JSON.parse(localStorage.getItem('msgx_blocked_contacts') || '[]');
+        return blocked.includes(String(contactId));
+    },
+    blockContact: (contactId, name) => {
+        const blocked = JSON.parse(localStorage.getItem('msgx_blocked_contacts') || '[]');
+        if (!blocked.includes(String(contactId))) blocked.push(String(contactId));
+        localStorage.setItem('msgx_blocked_contacts', JSON.stringify(blocked));
+        const names = JSON.parse(localStorage.getItem('msgx_blocked_names') || '{}');
+        names[contactId] = name;
+        localStorage.setItem('msgx_blocked_names', JSON.stringify(names));
+    },
+    unblockContact: (contactId) => {
+        let blocked = JSON.parse(localStorage.getItem('msgx_blocked_contacts') || '[]');
+        blocked = blocked.filter(id => id !== String(contactId));
+        localStorage.setItem('msgx_blocked_contacts', JSON.stringify(blocked));
+    },
 
     // ===== BROADCAST =====
     getBroadcasts: () => JSON.parse(localStorage.getItem('msgx_broadcasts') || '[]'),
@@ -149,7 +191,7 @@ const ChatsStorage = {
     }
 };
 
-// ===== GLOBAL WALLPAPER LOADER (ALL PAGES) =====
+// ===== GLOBAL WALLPAPER LOADER =====
 function loadGlobalWallpaper() {
     const wpType = localStorage.getItem('msgx_wallpaper_type');
     const wpData = localStorage.getItem('msgx_wallpaper');

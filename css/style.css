@@ -1362,3 +1362,51 @@ body::before {
 
 .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
 .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+/* ===== CHAT PIN / MUTE / ARCHIVE ===== */
+.chat-item.pinned {
+    background: rgba(136,0,255,0.15) !important;
+    border-left: 3px solid #8800ff;
+}
+
+.chat-item.archived {
+    opacity: 0.6;
+}
+
+.chat-item .chat-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.chat-item .chat-icons svg {
+    width: 14px;
+    height: 14px;
+    fill: #8800ff;
+}
+
+.chat-item .chat-icons .mute-icon svg {
+    fill: #ffaa00;
+}
+
+.chat-item .chat-icons .archive-icon svg {
+    fill: #8888bb;
+}
+
+.section-divider {
+    padding: 10px 18px;
+    font-size: 11px;
+    color: #6666aa;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(136,0,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-divider svg {
+    width: 14px;
+    height: 14px;
+    fill: #6666aa;
+}

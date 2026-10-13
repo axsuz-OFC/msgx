@@ -15,7 +15,6 @@
 </head>
 <body>
 
-<!-- Splash -->
 <div class="splash" id="splash">
     <div class="splash-logo">
         <svg viewBox="0 0 24 24" fill="#8800ff" width="90" height="90"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
@@ -113,26 +112,46 @@ function renderChats() {
         list.innerHTML = `<div class="empty"><p>No chats yet</p><button onclick="openAddContact()">Start New Chat</button></div>`;
         return;
     }
-    list.innerHTML = contacts.map(c => {
-        const msgs = ChatsStorage.getMessages(c.id);
-        const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-        const preview = lastMsg ? lastMsg.text : 'Tap to start chatting';
-        const time = lastMsg ? lastMsg.time : '';
-        const unread = msgs.filter(m => !m.sent && !m.read).length;
-        const icon = c.isGroup ? 
-            '<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#fff;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>' 
-            : c.name.charAt(0).toUpperCase();
 
-        return `<a href="chat.html?id=${c.id}" class="chat-item" data-contact-id="${c.id}">
-            <div class="chat-avatar" style="background:linear-gradient(135deg, #8800ff, #00aaff)">${icon}</div>
-            <div class="chat-body">
-                <div class="chat-top"><span class="chat-name">${c.name}</span><span class="chat-time">${time}</span></div>
-                <div class="chat-bottom"><span class="chat-preview">${preview}</span>${unread > 0 ? `<span class="chat-badge">${unread}</span>` : ''}</div>
-            </div>
-        </a>`;
-    }).join('');
+    const pinned = [], normal = [], archived = [];
+    contacts.forEach(c => {
+        const state = ChatsStorage.getChatState(c.id);
+        if (state.archived) archived.push(c);
+        else if (state.pinned) pinned.push(c);
+        else normal.push(c);
+    });
 
-    // Long press for chat options
+    const sortByTime = (arr) => arr.sort((a, b) => {
+        const aMsgs = ChatsStorage.getMessages(a.id);
+        const bMsgs = ChatsStorage.getMessages(b.id);
+        const aTime = aMsgs.length > 0 ? new Date(aMsgs[aMsgs.length - 1].date).getTime() : 0;
+        const bTime = bMsgs.length > 0 ? new Date(bMsgs[bMsgs.length - 1].date).getTime() : 0;
+        return bTime - aTime;
+    });
+
+    sortByTime(pinned);
+    sortByTime(normal);
+    sortByTime(archived);
+
+    let html = '';
+
+    if (pinned.length > 0) {
+        html += `<div class="section-divider"><svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>Pinned</div>`;
+        html += pinned.map(c => renderChatItem(c)).join('');
+    }
+
+    if (normal.length > 0) {
+        if (pinned.length > 0) html += `<div class="section-divider">All Chats</div>`;
+        html += normal.map(c => renderChatItem(c)).join('');
+    }
+
+    if (archived.length > 0) {
+        html += `<div class="section-divider"><svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/></svg>Archived</div>`;
+        html += archived.map(c => renderChatItem(c)).join('');
+    }
+
+    list.innerHTML = html;
+
     document.querySelectorAll('.chat-item').forEach(el => {
         let timer;
         el.addEventListener('touchstart', () => {
@@ -147,10 +166,47 @@ function renderChats() {
     });
 }
 
-// ===== CHAT OPTIONS MENU (WhatsApp Style) =====
+function renderChatItem(c) {
+    const msgs = ChatsStorage.getMessages(c.id);
+    const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+    const preview = lastMsg ? lastMsg.text : 'Tap to start chatting';
+    const time = lastMsg ? lastMsg.time : '';
+    const unread = msgs.filter(m => !m.sent && !m.read).length;
+    const state = ChatsStorage.getChatState(c.id);
+    const icon = c.isGroup ? 
+        '<svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#fff;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>' 
+        : c.name.charAt(0).toUpperCase();
+
+    let iconsHtml = '<div class="chat-icons">';
+    if (state.pinned) iconsHtml += '<span class="pin-icon"><svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg></span>';
+    if (state.muted) iconsHtml += '<span class="mute-icon"><svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg></span>';
+    if (state.archived) iconsHtml += '<span class="archive-icon"><svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/></svg></span>';
+    iconsHtml += '</div>';
+
+    const classes = ['chat-item'];
+    if (state.pinned) classes.push('pinned');
+    if (state.archived) classes.push('archived');
+
+    return `<a href="chat.html?id=${c.id}" class="${classes.join(' ')}" data-contact-id="${c.id}">
+        <div class="chat-avatar" style="background:linear-gradient(135deg, #8800ff, #00aaff)">${icon}</div>
+        <div class="chat-body">
+            <div class="chat-top">
+                <span class="chat-name">${c.name}</span>
+                ${time ? `<span class="chat-time">${time}</span>` : ''}
+            </div>
+            <div class="chat-bottom">
+                <span class="chat-preview">${preview}</span>
+                ${iconsHtml}
+                ${unread > 0 && !state.muted ? `<span class="chat-badge">${unread}</span>` : ''}
+            </div>
+        </div>
+    </a>`;
+}
+
 function openChatMenu(contactId) {
     const contact = ChatsStorage.getContact(contactId);
     if (!contact) return;
+    const state = ChatsStorage.getChatState(contactId);
 
     const modal = document.createElement('div');
     modal.className = 'modal show';
@@ -166,8 +222,20 @@ function openChatMenu(contactId) {
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#fff;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                     Open Chat
                 </button>
-                <button onclick="markChatRead('${contactId}')" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>
+                <button onclick="pinChat('${contactId}')" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+                    ${state.pinned ? 'Unpin' : 'Pin'} Chat
+                </button>
+                <button onclick="muteChat('${contactId}')" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                    ${state.muted ? 'Unmute' : 'Mute'} Chat
+                </button>
+                <button onclick="archiveChat('${contactId}')" style="padding:14px;background:rgba(136,136,187,0.1);color:#8888bb;border:1px solid #8888bb;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8888bb;"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z"/></svg>
+                    ${state.archived ? 'Unarchive' : 'Archive'} Chat
+                </button>
+                <button onclick="markChatRead('${contactId}')" style="padding:14px;background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid #00ff88;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00ff88;"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>
                     Mark as Read
                 </button>
                 <button onclick="clearChatMessages('${contactId}')" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -175,7 +243,10 @@ function openChatMenu(contactId) {
                     Clear Messages
                 </button>
                 <button onclick="deleteChat('${contactId}')" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        <path d="M11 9h2v6h-2zM11 17h2v2h-2z" fill="#fff"/>
+                    </svg>
                     Delete Contact
                 </button>
                 <button onclick="closeModal('chatMenuModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">
@@ -185,6 +256,30 @@ function openChatMenu(contactId) {
         </div>
     `;
     document.body.appendChild(modal);
+}
+
+function pinChat(contactId) {
+    ChatsStorage.togglePin(contactId);
+    closeModal('chatMenuModal');
+    renderChats();
+    const s = ChatsStorage.getChatState(contactId);
+    alert(s.pinned ? 'Chat pinned!' : 'Chat unpinned');
+}
+
+function muteChat(contactId) {
+    ChatsStorage.toggleMute(contactId);
+    closeModal('chatMenuModal');
+    renderChats();
+    const s = ChatsStorage.getChatState(contactId);
+    alert(s.muted ? 'Chat muted!' : 'Chat unmuted');
+}
+
+function archiveChat(contactId) {
+    ChatsStorage.toggleArchive(contactId);
+    closeModal('chatMenuModal');
+    renderChats();
+    const s = ChatsStorage.getChatState(contactId);
+    alert(s.archived ? 'Chat archived!' : 'Chat unarchived');
 }
 
 function openChat(contactId) { window.location.href = 'chat.html?id=' + contactId; }
@@ -241,8 +336,9 @@ function markAllRead() {
 }
 
 function closeModal(id) {
-    const m = document.getElementById(id);
-    if (m) m.remove();
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('show');
+    if (modal && modal.parentNode) modal.remove();
 }
 
 document.addEventListener('click', (e) => {

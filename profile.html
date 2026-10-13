@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Contact Info</h1>
+    <div class="app-bar-actions">
+        <button onclick="toggleProfileMenu()">
+            <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </button>
+    </div>
+</header>
+
+<div class="dropdown-menu" id="profileMenu">
+    <button onclick="editContact()">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        Edit Contact
+    </button>
+    <button onclick="blockContact()">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg>
+        Block Contact
+    </button>
+    <button onclick="reportContact()">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+        Report Contact
+    </button>
+</div>
+
+<main class="container" id="profileContent"></main>
+
+<div class="modal" id="editContactModal">
+    <div class="modal-content">
+        <h2>Edit Contact</h2>
+        <input type="text" id="editContactName" placeholder="Name">
+        <input type="text" id="editContactPhone" placeholder="Phone">
+        <input type="text" id="editContactAbout" placeholder="About">
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('editContactModal')">Cancel</button>
+            <button class="btn-save" onclick="saveEditContact()">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="viewStarredModal">
+    <div class="modal-content" id="viewStarredContent"></div>
+</div>
+
+<div class="modal" id="viewMediaModal">
+    <div class="modal-content" id="viewMediaContent"></div>
+</div>
+
+<script src="js/chats.js"></script>
+<script>
+let contactId = null;
+let contact = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadGlobalWallpaper();
+    const params = new URLSearchParams(window.location.search);
+    contactId = params.get('id');
+    if (!contactId) { window.location.href = 'index.html'; return; }
+    contact = ChatsStorage.getContact(contactId);
+    if (!contact) { window.location.href = 'index.html'; return; }
+    renderProfile();
+});
+
+function renderProfile() {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const starred = msgs.filter(m => m.starred).length;
+    const mediaCount = msgs.filter(m => m.type === 'image').length;
+    const videoCount = msgs.filter(m => m.type === 'video').length;
+    const docCount = msgs.filter(m => m.type === 'document').length;
+    const totalLinks = msgs.filter(m => m.text && m.text.match(/https?:\/\//)).length;
+
+    const color = getAvatarColor(contact.name);
+    const initial = contact.name.charAt(0).toUpperCase();
+
+    document.getElementById('profileContent').innerHTML = `
+        <div class="profile-card" style="cursor:default;">
+            <div class="profile-avatar-big" style="background:${color};">${initial}</div>
+            <div class="profile-name">${contact.name}</div>
+            <div class="profile-phone">${contact.phone || 'No phone number'}</div>
+            <div style="display:flex;justify-content:center;gap:15px;margin-top:20px;">
+                <button onclick="startAudioCall()" style="display:flex;flex-direction:column;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;font-family:inherit;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(0,170,255,0.15);border:1px solid #00aaff;display:flex;align-items:center;justify-content:center;">
+                        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#00aaff;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    </div>
+                    <span style="color:#00aaff;font-size:11px;">Audio</span>
+                </button>
+                <button onclick="startVideoCall()" style="display:flex;flex-direction:column;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;font-family:inherit;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(136,0,255,0.15);border:1px solid #8800ff;display:flex;align-items:center;justify-content:center;">
+                        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#8800ff;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                    </div>
+                    <span style="color:#8800ff;font-size:11px;">Video</span>
+                </button>
+                <button onclick="openChatFromProfile()" style="display:flex;flex-direction:column;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;font-family:inherit;">
+                    <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#8800ff,#00aaff);display:flex;align-items:center;justify-content:center;">
+                        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#fff;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                    </div>
+                    <span style="color:#fff;font-size:11px;">Message</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="settings-item">
+            <div class="settings-item-title">About</div>
+            <div class="settings-item-sub">${contact.about || 'Hey there! I am using MsGX.'}</div>
+        </div>
+
+        <div class="settings-item">
+            <div class="settings-item-title">Media, Links and Docs</div>
+            <div class="settings-item-sub">${mediaCount} Photos • ${videoCount} Videos • ${docCount} Docs • ${totalLinks} Links</div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <div onclick="viewMedia('image')" style="flex:1;padding:20px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center;cursor:pointer;">
+                    <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#8800ff;"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                    <div style="color:#fff;font-size:11px;margin-top:4px;">${mediaCount}</div>
+                </div>
+                <div onclick="viewMedia('video')" style="flex:1;padding:20px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center;cursor:pointer;">
+                    <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#8800ff;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                    <div style="color:#fff;font-size:11px;margin-top:4px;">${videoCount}</div>
+                </div>
+                <div onclick="viewMedia('document')" style="flex:1;padding:20px;background:rgba(0,0,0,0.3);border-radius:10px;text-align:center;cursor:pointer;">
+                    <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:#8800ff;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                    <div style="color:#fff;font-size:11px;margin-top:4px;">${docCount}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-row" onclick="viewStarred()" style="border-radius:16px;background:rgba(20,10,40,0.7);border:1px solid rgba(136,0,255,0.25);margin-bottom:14px;padding:18px;">
+            <div class="settings-row-icon" style="background:rgba(255,170,0,0.15);">
+                <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#ffaa00;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            </div>
+            <div class="settings-row-text">
+                <div class="settings-row-title">Starred Messages</div>
+                <div class="settings-row-sub">${starred} starred message${starred !== 1 ? 's' : ''}</div>
+            </div>
+            <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+        </div>
+
+        <div class="settings-list">
+            <div class="settings-row" onclick="startAudioCall()">
+                <div class="settings-row-icon" style="background:rgba(0,170,255,0.15);">
+                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#00aaff;"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                </div>
+                <div class="settings-row-text">
+                    <div class="settings-row-title">Audio Call</div>
+                    <div class="settings-row-sub">Call ${contact.name}</div>
+                </div>
+                <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+            </div>
+
+            <div class="settings-row" onclick="startVideoCall()">
+                <div class="settings-row-icon" style="background:rgba(136,0,255,0.15);">
+                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#8800ff;"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </div>
+                <div class="settings-row-text">
+                    <div class="settings-row-title">Video Call</div>
+                    <div class="settings-row-sub">Video call ${contact.name}</div>
+                </div>
+                <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+            </div>
+
+            <div class="settings-row" onclick="editContact()">
+                <div class="settings-row-icon" style="background:rgba(0,255,136,0.15);">
+                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#00ff88;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                </div>
+                <div class="settings-row-text">
+                    <div class="settings-row-title">Edit Contact</div>
+                    <div class="settings-row-sub">Change name, phone, about</div>
+                </div>
+                <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+            </div>
+
+            <div class="settings-row" onclick="blockContact()">
+                <div class="settings-row-icon" style="background:rgba(255,50,100,0.15);">
+                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#ff3366;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg>
+                </div>
+                <div class="settings-row-text">
+                    <div class="settings-row-title">${ChatsStorage.isBlocked(contactId) ? 'Unblock' : 'Block'} Contact</div>
+                    <div class="settings-row-sub">${ChatsStorage.isBlocked(contactId) ? 'Unblock this contact' : 'Block this contact'}</div>
+                </div>
+                <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+            </div>
+
+            <div class="settings-row" onclick="deleteContactProfile()">
+                <div class="settings-row-icon" style="background:rgba(255,50,100,0.15);">
+                    <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#ff3366;">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        <path d="M11 9h2v6h-2zM11 17h2v2h-2z" fill="#fff"/>
+                    </svg>
+                </div>
+                <div class="settings-row-text">
+                    <div class="settings-row-title">Delete Contact</div>
+                    <div class="settings-row-sub">Delete contact and all messages</div>
+                </div>
+                <div class="settings-row-arrow"><svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg></div>
+            </div>
+        </div>
+    `;
+}
+
+function getAvatarColor(name) {
+    const colors = [
+        'linear-gradient(135deg, #8800ff, #00aaff)',
+        'linear-gradient(135deg, #ff0080, #8800ff)',
+        'linear-gradient(135deg, #00aaff, #00ff88)',
+        'linear-gradient(135deg, #ff6600, #ff0080)',
+        'linear-gradient(135deg, #9c27b0, #00aaff)'
+    ];
+    return colors[name.charCodeAt(0) % colors.length];
+}
+
+function toggleProfileMenu() {
+    document.getElementById('profileMenu').classList.toggle('show');
+}
+
+function openChatFromProfile() {
+    window.location.href = 'chat.html?id=' + contactId;
+}
+
+function startAudioCall() {
+    window.location.href = 'calls.html?call=' + contactId + '&type=audio';
+}
+
+function startVideoCall() {
+    window.location.href = 'calls.html?call=' + contactId + '&type=video';
+}
+
+function editContact() {
+    document.getElementById('profileMenu').classList.remove('show');
+    document.getElementById('editContactName').value = contact.name || '';
+    document.getElementById('editContactPhone').value = contact.phone || '';
+    document.getElementById('editContactAbout').value = contact.about || '';
+    document.getElementById('editContactModal').classList.add('show');
+}
+
+function saveEditContact() {
+    const name = document.getElementById('editContactName').value.trim();
+    const phone = document.getElementById('editContactPhone').value.trim();
+    const about = document.getElementById('editContactAbout').value.trim();
+    if (!name) { alert('Please enter a name'); return; }
+
+    const contacts = ChatsStorage.getContacts();
+    const idx = contacts.findIndex(c => c.id == contactId);
+    if (idx >= 0) {
+        contacts[idx].name = name;
+        contacts[idx].phone = phone;
+        contacts[idx].about = about || 'Hey there! I am using MsGX.';
+        ChatsStorage.saveContacts(contacts);
+    }
+    closeModal('editContactModal');
+    contact = ChatsStorage.getContact(contactId);
+    renderProfile();
+    alert('Contact updated!');
+}
+
+function blockContact() {
+    document.getElementById('profileMenu').classList.remove('show');
+    const blocked = ChatsStorage.isBlocked(contactId);
+    if (blocked) {
+        ChatsStorage.unblockContact(contactId);
+        alert('Contact unblocked');
+    } else {
+        if (!confirm('Block this contact?')) return;
+        ChatsStorage.blockContact(contactId, contact.name);
+        alert('Contact blocked');
+    }
+    renderProfile();
+}
+
+function reportContact() {
+    document.getElementById('profileMenu').classList.remove('show');
+    if (!confirm('Report this contact?')) return;
+    alert('Contact reported');
+}
+
+function deleteContactProfile() {
+    if (!confirm('Delete this contact and all messages?')) return;
+    ChatsStorage.deleteContact(contactId);
+    alert('Contact deleted');
+    window.location.href = 'index.html';
+}
+
+function viewStarred() {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const starred = msgs.filter(m => m.starred);
+    const content = document.getElementById('viewStarredContent');
+    if (starred.length === 0) {
+        content.innerHTML = `
+            <h2>Starred Messages</h2>
+            <p style="color:#8888bb;font-size:13px;text-align:center;padding:20px;">No starred messages</p>
+            <button onclick="closeModal('viewStarredModal')" class="btn-save" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#8800ff,#00aaff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>
+        `;
+    } else {
+        content.innerHTML = `
+            <h2>Starred Messages (${starred.length})</h2>
+            <div style="max-height:400px;overflow-y:auto;margin-bottom:15px;">
+                ${starred.map(m => `
+                    <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;">
+                        <div style="color:#fff;font-size:13px;">${m.text}</div>
+                        <div style="color:#8888bb;font-size:11px;margin-top:4px;">${m.time}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <button onclick="closeModal('viewStarredModal')" class="btn-save" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#8800ff,#00aaff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>
+        `;
+    }
+    document.getElementById('viewStarredModal').classList.add('show');
+}
+
+function viewMedia(type) {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const items = msgs.filter(m => m.type === type);
+    const content = document.getElementById('viewMediaContent');
+    if (items.length === 0) {
+        content.innerHTML = `
+            <h2>${type.charAt(0).toUpperCase() + type.slice(1)}s</h2>
+            <p style="color:#8888bb;font-size:13px;text-align:center;padding:20px;">No ${type}s</p>
+            <button onclick="closeModal('viewMediaModal')" class="btn-save" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#8800ff,#00aaff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>
+        `;
+    } else {
+        content.innerHTML = `
+            <h2>${type.charAt(0).toUpperCase() + type.slice(1)}s (${items.length})</h2>
+            <div style="max-height:400px;overflow-y:auto;margin-bottom:15px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                ${items.map(m => {
+                    if (type === 'image') return `<img src="${m.extra.fileData}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;">`;
+                    if (type === 'video') return `<video src="${m.extra.fileData}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;"></video>`;
+                    return `<div style="padding:10px;background:rgba(0,0,0,0.3);border-radius:8px;text-align:center;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#8800ff;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6z"/></svg></div>`;
+                }).join('')}
+            </div>
+            <button onclick="closeModal('viewMediaModal')" class="btn-save" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#8800ff,#00aaff);color:#fff;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>
+        `;
+    }
+    document.getElementById('viewMediaModal').classList.add('show');
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('show');
+}
+
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('profileMenu');
+    if (menu && !e.target.closest('.app-bar')) menu.classList.remove('show');
+});
+</script>
+</body>
+</html>
