@@ -315,7 +315,12 @@ function renderMessages() {
             }
         }
 
-        if (m.type === 'image') content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;">`;
+        if (m.deleted) {
+            content = `<div class="deleted-msg">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                This message was deleted
+            </div>`;
+        } else if (m.type === 'image') content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;">`;
         else if (m.type === 'video') content = `<video src="${m.extra.fileData}" controls style="max-width:100%;border-radius:10px;margin-bottom:5px;"></video>`;
         else if (m.type === 'voice' || m.type === 'audio') content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor;flex-shrink:0;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg><audio src="${m.extra.fileData}" controls style="max-width:200px;"></audio></div>`;
         else if (m.type === 'document' || m.type === 'contact') content = `<div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:currentColor;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><div><div style="font-weight:600;">${m.extra.fileName}</div><div style="font-size:11px;opacity:0.7;">${m.extra.fileSize}</div></div></div>`;
@@ -323,7 +328,7 @@ function renderMessages() {
         else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${formatText(m.text)}`;
 
         let reactionsHtml = '';
-        if (m.reactions && Object.keys(m.reactions).length > 0) {
+        if (m.reactions && Object.keys(m.reactions).length > 0 && !m.deleted) {
             reactionsHtml = '<div class="msg-reactions">';
             for (const emoji in m.reactions) {
                 if (m.reactions[emoji] > 0) {
@@ -333,12 +338,12 @@ function renderMessages() {
             reactionsHtml += '</div>';
         }
 
-        const rgbClass = (rgbOn && m.type === 'text') ? 'rgb-active' : '';
+        const rgbClass = (rgbOn && m.type === 'text' && !m.deleted) ? 'rgb-active' : '';
         return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">
             ${quotedHtml}
             ${content}
             ${reactionsHtml}
-            <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span>
+            <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}${m.edited ? ' <span class="edited-label">(edited)</span>' : ''}</span>
             <div class="reply-icon">
                 <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
             </div>
@@ -369,14 +374,11 @@ function renderMessages() {
 
         el.addEventListener('touchend', (e) => {
             clearTimeout(pressTimer);
-            if (isSwiping && currentX > 60) {
-                setReply(msgId);
-            }
+            if (isSwiping && currentX > 60) setReply(msgId);
             el.classList.remove('swiping');
             isSwiping = false;
             currentX = 0;
 
-            // Double tap
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             if (tapLength < 300 && tapLength > 0) {
@@ -422,7 +424,7 @@ function addReaction(emoji, msgId = null) {
 
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === targetId);
-    if (!msg) return;
+    if (!msg || msg.deleted) return;
 
     if (!msg.reactions) msg.reactions = {};
 
@@ -510,6 +512,7 @@ function openMsgMenu(msgId) {
         <div class="modal-content">
             <h2>Message Options</h2>
             <div style="display:flex;flex-direction:column;gap:10px;">
+                ${!msg.deleted ? `
                 <button onclick="openReactionPicker(${msgId})" style="padding:14px;background:rgba(255,50,150,0.1);color:#ff3399;border:1px solid #ff3399;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3399;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     React
@@ -526,15 +529,106 @@ function openMsgMenu(msgId) {
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                     Copy Text
                 </button>
-                <button onclick="deleteMsg(${msgId})" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    Delete Message
+                ` : ''}
+
+                ${msg.sent && !msg.deleted && msg.type === 'text' ? `
+                <button onclick="openEditMsg(${msgId})" style="padding:14px;background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid #00ff88;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00ff88;">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                    </svg>
+                    Edit Message
                 </button>
+                ` : ''}
+
+                ${!msg.deleted ? `
+                <button onclick="deleteForMe(${msgId})" style="padding:14px;background:rgba(255,170,0,0.1);color:#ffaa00;border:1px solid #ffaa00;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                    Delete for Me
+                </button>
+
+                ${msg.sent ? `
+                <button onclick="deleteForEveryone(${msgId})" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3366;">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        <path d="M11 9h2v6h-2zM11 17h2v2h-2z" fill="#fff"/>
+                    </svg>
+                    Delete for Everyone
+                </button>
+                ` : ''}
+                ` : ''}
+
                 <button onclick="closeModal('msgMenuModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Cancel</button>
             </div>
         </div>
     `;
     document.body.appendChild(modal);
+}
+
+// ===== MESSAGE EDIT =====
+function openEditMsg(msgId) {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg || !msg.sent || msg.deleted) return;
+
+    closeModal('msgMenuModal');
+
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'editMsgModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Edit Message</h2>
+            <textarea id="editMsgInput" class="edit-input">${msg.text}</textarea>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('editMsgModal')">Cancel</button>
+                <button class="btn-save" onclick="saveEditMsg(${msgId})">Save</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => {
+        const inp = document.getElementById('editMsgInput');
+        if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+    }, 100);
+}
+
+function saveEditMsg(msgId) {
+    const newText = document.getElementById('editMsgInput').value.trim();
+    if (!newText) { alert('Message cannot be empty'); return; }
+
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg) return;
+
+    msg.text = newText;
+    msg.edited = true;
+    ChatsStorage.saveMessages(contactId, msgs);
+    closeModal('editMsgModal');
+    renderMessages();
+}
+
+// ===== MESSAGE DELETE =====
+function deleteForMe(msgId) {
+    if (!confirm('Delete this message for you?')) return;
+    ChatsStorage.deleteMessage(contactId, msgId);
+    closeModal('msgMenuModal');
+    renderMessages();
+}
+
+function deleteForEveryone(msgId) {
+    if (!confirm('Delete this message for everyone?')) return;
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg) return;
+
+    msg.deleted = true;
+    msg.text = '';
+    msg.reactions = {};
+    ChatsStorage.saveMessages(contactId, msgs);
+    closeModal('msgMenuModal');
+    renderMessages();
 }
 
 function toggleStarMsg(msgId) {
@@ -556,17 +650,10 @@ function copyMsg(msgId) {
     });
 }
 
-function deleteMsg(msgId) {
-    if (!confirm('Delete this message?')) return;
-    ChatsStorage.deleteMessage(contactId, msgId);
-    closeModal('msgMenuModal');
-    renderMessages();
-}
-
 function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('show');
-    if (modal && modal.parentNode && id === 'msgMenuModal') modal.remove();
+    if (modal && modal.parentNode && (id === 'msgMenuModal' || id === 'editMsgModal')) modal.remove();
 }
 
 document.addEventListener('click', (e) => {
