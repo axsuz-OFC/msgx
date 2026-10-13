@@ -908,3 +908,62 @@ body::before {
     cursor: pointer;
     font-family: inherit;
 }
+/* ===== RGB MESSAGE ANIMATION ===== */
+@keyframes rgbGlow {
+    0%   { box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; border-color: #ff0000; }
+    16%  { box-shadow: 0 0 15px #ff8800, 0 0 30px #ff8800; border-color: #ff8800; }
+    33%  { box-shadow: 0 0 15px #ffff00, 0 0 30px #ffff00; border-color: #ffff00; }
+    50%  { box-shadow: 0 0 15px #00ff00, 0 0 30px #00ff00; border-color: #00ff00; }
+    66%  { box-shadow: 0 0 15px #0088ff, 0 0 30px #0088ff; border-color: #0088ff; }
+    83%  { box-shadow: 0 0 15px #8800ff, 0 0 30px #8800ff; border-color: #8800ff; }
+    100% { box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; border-color: #ff0000; }
+}
+
+@keyframes rgbBorder {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.msg.rgb-active {
+    animation: rgbGlow 3s linear infinite;
+    border: 2px solid #ff0000;
+    background: rgba(20,10,40,0.95) !important;
+    color: #fff !important;
+}
+
+.msg.rgb-active.sent {
+    background: linear-gradient(135deg, #1a0033, #0a0a2a) !important;
+}
+
+.msg.rgb-active.received {
+    background: linear-gradient(135deg, #0a0a1a, #1a0033) !important;
+}
+
+/* ===== RGB SETTINGS ICON ===== */
+.settings-row-icon.rgb-icon {
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0000) !important;
+    background-size: 300% 300% !important;
+    animation: rgbBorder 3s linear infinite;
+}
+
+/* ===== TEXT FORMATTING ===== */
+.msg b, .msg strong { font-weight: 700; color: #fff; }
+.msg i, .msg em { font-style: italic; }
+.msg s, .msg del { text-decoration: line-through; opacity: 0.8; }
+.msg code {
+    background: rgba(0,0,0,0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #00ff88;
+}
+.msg blockquote {
+    border-left: 3px solid #8800ff;
+    padding-left: 10px;
+    margin: 4px 0;
+    opacity: 0.85;
+    font-style: italic;
+}
+.msg a { color: #00aaff; text-decoration: underline; }

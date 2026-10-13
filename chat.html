@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chat - MsGX</title>
-<link rel="stylesheet" href="css/style-v2.css">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -12,12 +12,10 @@
     <div class="chat-view-header" id="chatHeader"></div>
     <div class="chat-messages" id="chatMessages"></div>
 
-    <!-- Emoji Picker -->
     <div class="emoji-picker" id="emojiPicker">
         <div class="emoji-grid" id="emojiGrid"></div>
     </div>
 
-    <!-- Attach Menu -->
     <div class="attach-menu" id="attachMenu">
         <button onclick="attachFile('audio')">
             <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
@@ -148,12 +146,8 @@ function getAvatarColor(name) {
     return colors[name.charCodeAt(0) % colors.length];
 }
 
-function startAudioCallFromChat() {
-    window.location.href = 'calls.html?call=' + contactId + '&type=audio';
-}
-function startVideoCallFromChat() {
-    window.location.href = 'calls.html?call=' + contactId + '&type=video';
-}
+function startAudioCallFromChat() { window.location.href = 'calls.html?call=' + contactId + '&type=audio'; }
+function startVideoCallFromChat() { window.location.href = 'calls.html?call=' + contactId + '&type=video'; }
 
 function toggleEmojiPicker() {
     document.getElementById('emojiPicker').classList.toggle('show');
@@ -278,10 +272,13 @@ function sendPoll() {
 function renderMessages() {
     const container = document.getElementById('chatMessages');
     const messages = ChatsStorage.getMessages(contactId);
+    const rgbOn = localStorage.getItem('msgx_rgb') !== 'false';
+
     if (messages.length === 0) {
         container.innerHTML = `<div style="text-align:center;color:#6666aa;font-size:12px;padding:20px;">Messages are end-to-end encrypted</div>`;
         return;
     }
+
     container.innerHTML = messages.map(m => {
         let content = '';
         if (m.type === 'image') content = `<img src="${m.extra.fileData}" style="max-width:100%;border-radius:10px;margin-bottom:5px;">`;
@@ -289,10 +286,26 @@ function renderMessages() {
         else if (m.type === 'voice' || m.type === 'audio') content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:currentColor;flex-shrink:0;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg><audio src="${m.extra.fileData}" controls style="max-width:200px;"></audio></div>`;
         else if (m.type === 'document' || m.type === 'contact') content = `<div style="display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:currentColor;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><div><div style="font-weight:600;">${m.extra.fileName}</div><div style="font-size:11px;opacity:0.7;">${m.extra.fileSize}</div></div></div>`;
         else if (m.type === 'poll') content = `<div style="font-weight:600;margin-bottom:8px;">${m.text}</div>${m.extra.options.map((opt, i) => `<div onclick="votePoll(${m.id}, ${i})" style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px;">${opt} <span style="float:right;opacity:0.7;">${m.extra.votes[i]} votes</span></div>`).join('')}`;
-        else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${m.text}`;
-        return `<div class="msg ${m.sent ? 'sent' : 'received'}" data-msg-id="${m.id}">${content}<span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span></div>`;
+        else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${formatText(m.text)}`;
+
+        const rgbClass = (rgbOn && m.type === 'text') ? 'rgb-active' : '';
+        return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">${content}<span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span></div>`;
     }).join('');
     container.scrollTop = container.scrollHeight;
+}
+
+function formatText(text) {
+    if (!text) return '';
+    let html = text;
+    html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html = html.replace(/\*([^*\n]+)\*/g, '<b>$1</b>');
+    html = html.replace(/_([^_\n]+)_/g, '<i>$1</i>');
+    html = html.replace(/~([^~\n]+)~/g, '<s>$1</s>');
+    html = html.replace(/```([^`]+)```/g, '<code>$1</code>');
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
 }
 
 function votePoll(msgId, optionIndex) {
