@@ -81,7 +81,6 @@
     </div>
 </div>
 
-<!-- Reaction Picker -->
 <div class="reaction-picker" id="reactionPicker">
     <button onclick="addReaction('❤️')">❤️</button>
     <button onclick="addReaction('👍')">👍</button>
@@ -117,6 +116,7 @@ let voiceSeconds = 0;
 let voiceTimerInterval = null;
 let replyToMsgId = null;
 let reactionTargetMsgId = null;
+let typingTimeout = null;
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="avatar" style="background:${getAvatarColor(contact.name)}">${icon}</div>
         <div class="info">
             <div class="name">${contact.name}</div>
-            <div class="status">${contact.isGroup ? (contact.members.length + ' members') : (contact.phone || 'online')}</div>
+            <div class="status" id="chatStatus">${contact.isGroup ? (contact.members.length + ' members') : (contact.phone || 'online')}</div>
         </div>
         <div style="display:flex;gap:12px;">
             <button onclick="startAudioCallFromChat()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;">
@@ -153,6 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const emojiGrid = document.getElementById('emojiGrid');
     emojiGrid.innerHTML = EMOJIS.map(e => `<button onclick="insertEmoji('${e}')">${e}</button>`).join('');
+
+    const msgInput = document.getElementById('msgInput');
+    msgInput.addEventListener('input', () => showTypingIndicator());
 
     renderMessages();
 });
@@ -349,6 +352,13 @@ function renderMessages() {
             </div>
         </div>`;
     }).join('');
+
+    // Simulated typing bubble from other side
+    const otherTyping = localStorage.getItem('msgx_sim_typing_' + contactId) === 'true';
+    if (otherTyping && messages.length > 0) {
+        container.innerHTML += `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
+    }
+
     container.scrollTop = container.scrollHeight;
 
     document.querySelectorAll('.msg').forEach(el => {
@@ -399,7 +409,7 @@ function renderMessages() {
 function setReply(msgId) {
     const messages = ChatsStorage.getMessages(contactId);
     const msg = messages.find(m => m.id === msgId);
-    if (!msg) return;
+    if (!msg || msg.deleted) return;
     replyToMsgId = msgId;
     document.getElementById('replyName').textContent = msg.sent ? 'Replying to yourself' : 'Replying to ' + contact.name;
     document.getElementById('replyText').textContent = (msg.text || 'Message').substring(0, 50);
@@ -450,6 +460,33 @@ function showHeartPopup(el) {
     setTimeout(() => popup.remove(), 600);
 }
 
+// ===== TYPING INDICATOR =====
+function showTypingIndicator() {
+    const statusEl = document.getElementById('chatStatus');
+    if (!statusEl) return;
+
+    statusEl.innerHTML = `typing<span class="typing-dots"><span></span><span></span><span></span></span>`;
+    statusEl.classList.add('typing');
+
+    localStorage.setItem('msgx_typing_' + contactId, 'true');
+    localStorage.setItem('msgx_typing_time_' + contactId, Date.now().toString());
+
+    if (typingTimeout) clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => stopTypingIndicator(), 2000);
+}
+
+function stopTypingIndicator() {
+    const statusEl = document.getElementById('chatStatus');
+    if (!statusEl) return;
+
+    statusEl.classList.remove('typing');
+    statusEl.textContent = contact.isGroup ? (contact.members.length + ' members') : (contact.phone || 'online');
+
+    localStorage.removeItem('msgx_typing_' + contactId);
+    localStorage.removeItem('msgx_typing_time_' + contactId);
+    if (typingTimeout) clearTimeout(typingTimeout);
+}
+
 function formatText(text) {
     if (!text) return '';
     let html = text;
@@ -490,14 +527,21 @@ function sendMessage() {
 
     input.value = '';
     handleInputChange();
+    stopTypingIndicator();
     renderMessages();
 
     setTimeout(() => {
-        const replies = ['Hi!', 'How are you?', 'Okay', 'Thanks!', 'Sure!', 'Got it', 'See you soon!'];
-        const reply = replies[Math.floor(Math.random() * replies.length)];
-        ChatsStorage.addMessage(contactId, reply, false);
+        // Simulate other side typing
+        localStorage.setItem('msgx_sim_typing_' + contactId, 'true');
         renderMessages();
-    }, 1200);
+        setTimeout(() => {
+            localStorage.removeItem('msgx_sim_typing_' + contactId);
+            const replies = ['Hi!', 'How are you?', 'Okay', 'Thanks!', 'Sure!', 'Got it', 'See you soon!'];
+            const reply = replies[Math.floor(Math.random() * replies.length)];
+            ChatsStorage.addMessage(contactId, reply, false);
+            renderMessages();
+        }, 1500);
+    }, 800);
 }
 
 function openMsgMenu(msgId) {
@@ -566,7 +610,6 @@ function openMsgMenu(msgId) {
     document.body.appendChild(modal);
 }
 
-// ===== MESSAGE EDIT =====
 function openEditMsg(msgId) {
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === msgId);
@@ -609,7 +652,6 @@ function saveEditMsg(msgId) {
     renderMessages();
 }
 
-// ===== MESSAGE DELETE =====
 function deleteForMe(msgId) {
     if (!confirm('Delete this message for you?')) return;
     ChatsStorage.deleteMessage(contactId, msgId);
