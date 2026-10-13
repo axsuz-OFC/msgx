@@ -81,6 +81,16 @@
     </div>
 </div>
 
+<!-- Reaction Picker -->
+<div class="reaction-picker" id="reactionPicker">
+    <button onclick="addReaction('❤️')">❤️</button>
+    <button onclick="addReaction('👍')">👍</button>
+    <button onclick="addReaction('😂')">😂</button>
+    <button onclick="addReaction('😮')">😮</button>
+    <button onclick="addReaction('😢')">😢</button>
+    <button onclick="addReaction('🙏')">🙏</button>
+</div>
+
 <div class="modal" id="pollModal">
     <div class="modal-content">
         <h2>Create Poll</h2>
@@ -106,6 +116,7 @@ let audioChunks = [];
 let voiceSeconds = 0;
 let voiceTimerInterval = null;
 let replyToMsgId = null;
+let reactionTargetMsgId = null;
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
@@ -311,10 +322,22 @@ function renderMessages() {
         else if (m.type === 'poll') content = `<div style="font-weight:600;margin-bottom:8px;">${m.text}</div>${m.extra.options.map((opt, i) => `<div onclick="votePoll(${m.id}, ${i})" style="padding:8px 12px;background:rgba(255,255,255,0.15);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13px;">${opt} <span style="float:right;opacity:0.7;">${m.extra.votes[i]} votes</span></div>`).join('')}`;
         else content = `${m.starred ? '<span style="color:#ffaa00;">★</span> ' : ''}${formatText(m.text)}`;
 
+        let reactionsHtml = '';
+        if (m.reactions && Object.keys(m.reactions).length > 0) {
+            reactionsHtml = '<div class="msg-reactions">';
+            for (const emoji in m.reactions) {
+                if (m.reactions[emoji] > 0) {
+                    reactionsHtml += `<span class="reaction-bubble" onclick="event.stopPropagation(); addReaction('${emoji}', ${m.id})">${emoji} <span class="reaction-count">${m.reactions[emoji]}</span></span>`;
+                }
+            }
+            reactionsHtml += '</div>';
+        }
+
         const rgbClass = (rgbOn && m.type === 'text') ? 'rgb-active' : '';
         return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">
             ${quotedHtml}
             ${content}
+            ${reactionsHtml}
             <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}</span>
             <div class="reply-icon">
                 <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
@@ -323,10 +346,10 @@ function renderMessages() {
     }).join('');
     container.scrollTop = container.scrollHeight;
 
-    // Long press + swipe to reply
     document.querySelectorAll('.msg').forEach(el => {
         const msgId = parseInt(el.dataset.msgId);
         let pressTimer, startX = 0, currentX = 0, isSwiping = false;
+        let lastTap = 0;
 
         el.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
@@ -344,7 +367,7 @@ function renderMessages() {
             }
         });
 
-        el.addEventListener('touchend', () => {
+        el.addEventListener('touchend', (e) => {
             clearTimeout(pressTimer);
             if (isSwiping && currentX > 60) {
                 setReply(msgId);
@@ -352,6 +375,16 @@ function renderMessages() {
             el.classList.remove('swiping');
             isSwiping = false;
             currentX = 0;
+
+            // Double tap
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault();
+                showHeartPopup(el);
+                addReaction('❤️', msgId);
+            }
+            lastTap = currentTime;
         });
 
         el.addEventListener('contextmenu', (e) => {
@@ -375,6 +408,44 @@ function setReply(msgId) {
 function cancelReply() {
     replyToMsgId = null;
     document.getElementById('replyInputPreview').classList.remove('show');
+}
+
+function openReactionPicker(msgId) {
+    reactionTargetMsgId = msgId;
+    closeModal('msgMenuModal');
+    document.getElementById('reactionPicker').classList.add('show');
+}
+
+function addReaction(emoji, msgId = null) {
+    const targetId = msgId || reactionTargetMsgId;
+    if (!targetId) return;
+
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === targetId);
+    if (!msg) return;
+
+    if (!msg.reactions) msg.reactions = {};
+
+    if (msg.reactions[emoji]) {
+        msg.reactions[emoji]--;
+        if (msg.reactions[emoji] <= 0) delete msg.reactions[emoji];
+    } else {
+        msg.reactions[emoji] = 1;
+    }
+
+    ChatsStorage.saveMessages(contactId, msgs);
+    document.getElementById('reactionPicker').classList.remove('show');
+    reactionTargetMsgId = null;
+    renderMessages();
+}
+
+function showHeartPopup(el) {
+    const popup = document.createElement('div');
+    popup.className = 'heart-popup';
+    popup.textContent = '❤️';
+    el.style.position = 'relative';
+    el.appendChild(popup);
+    setTimeout(() => popup.remove(), 600);
 }
 
 function formatText(text) {
@@ -439,6 +510,10 @@ function openMsgMenu(msgId) {
         <div class="modal-content">
             <h2>Message Options</h2>
             <div style="display:flex;flex-direction:column;gap:10px;">
+                <button onclick="openReactionPicker(${msgId})" style="padding:14px;background:rgba(255,50,150,0.1);color:#ff3399;border:1px solid #ff3399;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ff3399;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    React
+                </button>
                 <button onclick="setReply(${msgId}); closeModal('msgMenuModal');" style="padding:14px;background:rgba(0,170,255,0.1);color:#00aaff;border:1px solid #00aaff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00aaff;"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
                     Reply
@@ -497,8 +572,10 @@ function closeModal(id) {
 document.addEventListener('click', (e) => {
     const attachMenu = document.getElementById('attachMenu');
     const emojiPicker = document.getElementById('emojiPicker');
+    const picker = document.getElementById('reactionPicker');
     if (attachMenu && !e.target.closest('.chat-input-bar') && !e.target.closest('.attach-menu')) attachMenu.classList.remove('show');
     if (emojiPicker && !e.target.closest('.chat-input-bar') && !e.target.closest('.emoji-picker')) emojiPicker.classList.remove('show');
+    if (picker && !e.target.closest('.reaction-picker') && !e.target.closest('.modal')) picker.classList.remove('show');
 });
 </script>
 </body>
