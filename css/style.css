@@ -1410,3 +1410,284 @@ body::before {
     height: 14px;
     fill: #6666aa;
 }
+/* ===== LIGHT THEME ===== */
+body.light-theme {
+    background: #f0f2f5 !important;
+    color: #111b21 !important;
+}
+
+body.light-theme::before {
+    background: rgba(240, 242, 245, 0.4) !important;
+}
+
+body.light-theme .app-bar,
+body.light-theme .tabs,
+body.light-theme .bottom-nav,
+body.light-theme .chat-view-header,
+body.light-theme .chat-input-bar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(136, 0, 255, 0.2) !important;
+}
+
+body.light-theme .app-bar h1 {
+    background: linear-gradient(135deg, #8800ff, #00aaff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.light-theme .app-bar-actions button svg {
+    fill: #54656f !important;
+}
+
+body.light-theme .tab {
+    color: #667781 !important;
+}
+
+body.light-theme .tab svg {
+    fill: #667781 !important;
+}
+
+body.light-theme .tab.active {
+    color: #8800ff !important;
+}
+
+body.light-theme .tab.active svg {
+    fill: #8800ff !important;
+}
+
+body.light-theme .nav-item {
+    color: #667781 !important;
+}
+
+body.light-theme .nav-item svg {
+    fill: #667781 !important;
+}
+
+body.light-theme .nav-item.active {
+    color: #8800ff !important;
+}
+
+body.light-theme .nav-item.active svg {
+    fill: #8800ff !important;
+}
+
+body.light-theme .chat-item {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-theme .chat-item:active {
+    background: rgba(136, 0, 255, 0.1) !important;
+}
+
+body.light-theme .chat-item.pinned {
+    background: rgba(136, 0, 255, 0.08) !important;
+}
+
+body.light-theme .chat-name,
+body.light-theme .settings-row-title,
+body.light-theme .settings-item-title,
+body.light-theme .profile-name,
+body.light-theme .section-title {
+    color: #111b21 !important;
+}
+
+body.light-theme .chat-time,
+body.light-theme .chat-preview,
+body.light-theme .settings-row-sub,
+body.light-theme .settings-item-sub,
+body.light-theme .profile-phone,
+body.light-theme .profile-username {
+    color: #667781 !important;
+}
+
+body.light-theme .dropdown-menu {
+    background: #ffffff !important;
+    border-color: rgba(136, 0, 255, 0.3) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme .dropdown-menu button,
+body.light-theme .dropdown-menu .menu-link {
+    color: #111b21 !important;
+}
+
+body.light-theme .dropdown-menu button:hover,
+body.light-theme .dropdown-menu .menu-link:hover {
+    background: rgba(136, 0, 255, 0.1) !important;
+}
+
+body.light-theme .menu-icon {
+    fill: #54656f !important;
+}
+
+body.light-theme .profile-card,
+body.light-theme .settings-list,
+body.light-theme .settings-item,
+body.light-theme .settings-row {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(136, 0, 255, 0.2) !important;
+}
+
+body.light-theme .settings-row-icon {
+    background: rgba(136, 0, 255, 0.1) !important;
+}
+
+body.light-theme .section-divider {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #667781 !important;
+    border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-theme .section-divider svg {
+    fill: #667781 !important;
+}
+
+body.light-theme .msg.received {
+    background: #ffffff !important;
+    border-color: rgba(136, 0, 255, 0.2) !important;
+    color: #111b21 !important;
+}
+
+body.light-theme .msg.received .time {
+    color: rgba(0, 0, 0, 0.5) !important;
+}
+
+body.light-theme .msg.received b,
+body.light-theme .msg.received strong {
+    color: #111b21 !important;
+}
+
+body.light-theme .msg.received code {
+    background: rgba(0, 0, 0, 0.1) !important;
+    color: #00aa44 !important;
+}
+
+body.light-theme .chat-input-bar input {
+    background: #ffffff !important;
+    border-color: rgba(136, 0, 255, 0.3) !important;
+    color: #111b21 !important;
+}
+
+body.light-theme .chat-input-bar input::placeholder {
+    color: #8696a0 !important;
+}
+
+body.light-theme .modal-content {
+    background: #ffffff !important;
+    border-color: rgba(136, 0, 255, 0.3) !important;
+}
+
+body.light-theme .modal-content h2 {
+    background: linear-gradient(135deg, #8800ff, #00aaff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+body.light-theme .modal-content input,
+body.light-theme .edit-input {
+    background: #f0f2f5 !important;
+    color: #111b21 !important;
+    border-color: rgba(136, 0, 255, 0.3) !important;
+}
+
+body.light-theme .empty {
+    color: #667781 !important;
+}
+
+body.light-theme .empty-icon svg {
+    fill: #8696a0 !important;
+}
+
+body.light-theme .chat-view {
+    background: #efeae2 !important;
+}
+
+body.light-theme .chat-messages {
+    background: transparent !important;
+}
+
+body.light-theme .attach-menu,
+body.light-theme .emoji-picker,
+body.light-theme .reaction-picker {
+    background: #ffffff !important;
+    border-color: rgba(136, 0, 255, 0.3) !important;
+}
+
+body.light-theme .attach-menu button,
+body.light-theme .reaction-picker button {
+    color: #111b21 !important;
+}
+
+body.light-theme .emoji-picker {
+    background: #ffffff !important;
+}
+
+body.light-theme .emoji-grid button {
+    color: #111b21;
+}
+
+body.light-theme .deleted-msg {
+    color: #667781 !important;
+}
+
+body.light-theme .deleted-msg svg {
+    fill: #8696a0 !important;
+}
+
+/* Theme option buttons */
+.theme-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.theme-option {
+    flex: 1;
+    padding: 14px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(136, 0, 255, 0.25);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.theme-option:hover,
+.theme-option:active {
+    transform: scale(0.97);
+}
+
+.theme-option.active {
+    border-color: #8800ff;
+    background: rgba(136, 0, 255, 0.15);
+    box-shadow: 0 0 20px rgba(136, 0, 255, 0.4);
+}
+
+.theme-option svg {
+    width: 28px;
+    height: 28px;
+    fill: #8800ff;
+    margin-bottom: 6px;
+}
+
+.theme-option .theme-label {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+body.light-theme .theme-option {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .theme-option .theme-label {
+    color: #111b21;
+}
+
+body.light-theme .theme-option.active {
+    background: rgba(136, 0, 255, 0.15);
+}

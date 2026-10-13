@@ -84,7 +84,7 @@ const ChatsStorage = {
     },
     clearMessages: (contactId) => localStorage.removeItem('msgx_msgs_' + contactId),
 
-    // ===== CHAT STATE (Pin/Mute/Archive) =====
+    // ===== CHAT STATE =====
     getChatState: (contactId) => {
         const states = JSON.parse(localStorage.getItem('msgx_chat_states') || '{}');
         return states[contactId] || { pinned: false, muted: false, archived: false };
@@ -125,6 +125,10 @@ const ChatsStorage = {
         blocked = blocked.filter(id => id !== String(contactId));
         localStorage.setItem('msgx_blocked_contacts', JSON.stringify(blocked));
     },
+
+    // ===== THEME =====
+    getTheme: () => localStorage.getItem('msgx_theme') || 'dark',
+    setTheme: (theme) => localStorage.setItem('msgx_theme', theme),
 
     // ===== BROADCAST =====
     getBroadcasts: () => JSON.parse(localStorage.getItem('msgx_broadcasts') || '[]'),
@@ -215,4 +219,27 @@ function loadGlobalWallpaper() {
         document.body.style.backgroundAttachment = 'fixed';
         document.body.style.backgroundRepeat = 'no-repeat';
     }
+}
+
+// ===== THEME APPLIER =====
+function applyTheme() {
+    const theme = localStorage.getItem('msgx_theme') || 'dark';
+    document.body.classList.remove('light-theme');
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+    } else if (theme === 'system') {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            document.body.classList.add('light-theme');
+        }
+    }
+}
+
+// Auto apply on every page load
+applyTheme();
+
+// Listen for system theme changes
+if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+        if (localStorage.getItem('msgx_theme') === 'system') applyTheme();
+    });
 }
