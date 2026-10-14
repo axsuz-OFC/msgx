@@ -104,6 +104,17 @@
     </div>
 </div>
 
+<div class="modal" id="forwardModal">
+    <div class="modal-content">
+        <h2>Forward to...</h2>
+        <div id="forwardContactList" style="max-height:350px;overflow-y:auto;margin-bottom:15px;"></div>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('forwardModal')">Cancel</button>
+            <button class="btn-save" onclick="forwardMessage()" id="forwardSendBtn" disabled style="opacity:0.5;">Send</button>
+        </div>
+    </div>
+</div>
+
 <input type="file" id="fileInput" style="display:none;">
 
 <script src="js/chats.js"></script>
@@ -118,6 +129,8 @@ let replyToMsgId = null;
 let reactionTargetMsgId = null;
 let typingTimeout = null;
 let audioSpeeds = {};
+let forwardMsgId = null;
+let forwardSelected = [];
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
@@ -309,6 +322,14 @@ function renderMessages() {
     container.innerHTML = messages.map(m => {
         let content = '';
         let quotedHtml = '';
+        let forwardedHtml = '';
+
+        if (m.forwarded) {
+            forwardedHtml = `<div class="forwarded-label">
+                <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+                Forwarded
+            </div>`;
+        }
 
         if (m.replyTo) {
             const repliedMsg = messages.find(x => x.id === m.replyTo);
@@ -364,6 +385,7 @@ function renderMessages() {
 
         const rgbClass = (rgbOn && m.type === 'text' && !m.deleted) ? 'rgb-active' : '';
         return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">
+            ${forwardedHtml}
             ${quotedHtml}
             ${content}
             ${reactionsHtml}
@@ -374,7 +396,6 @@ function renderMessages() {
         </div>`;
     }).join('');
 
-    // Simulated typing bubble
     const otherTyping = localStorage.getItem('msgx_sim_typing_' + contactId) === 'true';
     if (otherTyping && messages.length > 0) {
         container.innerHTML += `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
@@ -382,7 +403,6 @@ function renderMessages() {
 
     container.scrollTop = container.scrollHeight;
 
-    // Setup audio players
     messages.forEach(m => {
         if (m.type === 'voice' || m.type === 'audio') {
             const audio = document.getElementById('audio_' + m.id);
@@ -398,7 +418,6 @@ function renderMessages() {
         }
     });
 
-    // Prevent long press on voice players
     document.querySelectorAll('.voice-msg-container').forEach(el => {
         el.addEventListener('contextmenu', (e) => e.stopPropagation());
         el.addEventListener('touchstart', (e) => e.stopPropagation());
@@ -715,6 +734,10 @@ function openMsgMenu(msgId) {
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#ffaa00;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                     ${msg.starred ? 'Unstar' : 'Star'} Message
                 </button>
+                <button onclick="openForwardPicker(${msgId})" style="padding:14px;background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid #00ff88;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00ff88;"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+                    Forward
+                </button>
                 <button onclick="copyMsg(${msgId})" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                     Copy Text
@@ -754,6 +777,99 @@ function openMsgMenu(msgId) {
         </div>
     `;
     document.body.appendChild(modal);
+}
+
+// ===== MESSAGE FORWARD =====
+function openForwardPicker(msgId) {
+    forwardMsgId = msgId;
+    forwardSelected = [];
+    closeModal('msgMenuModal');
+
+    const contacts = ChatsStorage.getContacts();
+    const list = document.getElementById('forwardContactList');
+
+    if (contacts.length === 0) {
+        list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No contacts available</p>';
+    } else {
+        list.innerHTML = contacts.map(c => {
+            const color = getAvatarColor(c.name);
+            return `<div class="forward-contact-item" data-id="${c.id}" onclick="toggleForwardContact(${c.id})">
+                <div class="forward-checkbox" id="fcheck_${c.id}">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </div>
+                <div class="forward-avatar" style="background:${color};">${c.name.charAt(0).toUpperCase()}</div>
+                <div class="forward-info">
+                    <div class="forward-name">${c.name}</div>
+                    <div class="forward-phone">${c.phone || 'No phone'}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    updateForwardBtn();
+    document.getElementById('forwardModal').classList.add('show');
+}
+
+function toggleForwardContact(id) {
+    const idx = forwardSelected.indexOf(id);
+    if (idx >= 0) forwardSelected.splice(idx, 1);
+    else forwardSelected.push(id);
+
+    const check = document.getElementById('fcheck_' + id);
+    const item = check.parentElement;
+    if (forwardSelected.includes(id)) {
+        check.classList.add('checked');
+        item.classList.add('selected');
+    } else {
+        check.classList.remove('checked');
+        item.classList.remove('selected');
+    }
+    updateForwardBtn();
+}
+
+function updateForwardBtn() {
+    const btn = document.getElementById('forwardSendBtn');
+    if (forwardSelected.length > 0) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Send (' + forwardSelected.length + ')';
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.textContent = 'Send';
+    }
+}
+
+function forwardMessage() {
+    if (forwardSelected.length === 0) return;
+
+    const msgs = ChatsStorage.getMessages(contactId);
+    const originalMsg = msgs.find(m => m.id === forwardMsgId);
+    if (!originalMsg) return;
+
+    forwardSelected.forEach(targetId => {
+        const targetMsgs = ChatsStorage.getMessages(targetId);
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        const newMsg = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            text: originalMsg.text,
+            sent: true,
+            time: time,
+            sender: 'Me',
+            type: originalMsg.type,
+            extra: originalMsg.extra,
+            read: true,
+            starred: false,
+            forwarded: true,
+            date: now.toISOString()
+        };
+        targetMsgs.push(newMsg);
+        ChatsStorage.saveMessages(targetId, targetMsgs);
+    });
+
+    closeModal('forwardModal');
+    alert('Forwarded to ' + forwardSelected.length + ' contact' + (forwardSelected.length > 1 ? 's' : ''));
 }
 
 function openEditMsg(msgId) {
@@ -841,7 +957,7 @@ function copyMsg(msgId) {
 function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('show');
-    if (modal && modal.parentNode && (id === 'msgMenuModal' || id === 'editMsgModal')) modal.remove();
+    if (modal && modal.parentNode && (id === 'msgMenuModal' || id === 'editMsgModal' || id === 'forwardModal')) modal.remove();
 }
 
 document.addEventListener('click', (e) => {

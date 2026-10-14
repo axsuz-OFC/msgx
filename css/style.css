@@ -1989,3 +1989,94 @@ body.light-theme .theme-option.active { background: rgba(136, 0, 255, 0.15); }
 }
 
 .msg.sent .voice-mic-icon svg { fill: #fff; }
+/* ===== MESSAGE FORWARD ===== */
+.forwarded-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.forwarded-label svg {
+    width: 12px;
+    height: 12px;
+    fill: rgba(255,255,255,0.6);
+}
+
+.msg.received .forwarded-label {
+    color: #8888bb;
+}
+
+.msg.received .forwarded-label svg {
+    fill: #8888bb;
+}
+
+.forward-contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.forward-contact-item:active { background: rgba(136,0,255,0.2); }
+
+.forward-contact-item.selected {
+    background: rgba(136,0,255,0.25);
+    border: 1px solid #8800ff;
+}
+
+.forward-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #8800ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.forward-checkbox.checked { background: #8800ff; }
+
+.forward-checkbox svg {
+    width: 14px;
+    height: 14px;
+    fill: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.forward-checkbox.checked svg { opacity: 1; }
+
+.forward-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.forward-info { flex: 1; min-width: 0; }
+.forward-name { color: #fff; font-size: 14px; font-weight: 600; }
+.forward-phone { color: #8888bb; font-size: 11px; margin-top: 2px; }
+
+/* Light theme overrides */
+body.light-theme .forwarded-label { color: #667781; }
+body.light-theme .forwarded-label svg { fill: #667781; }
+body.light-theme .forward-contact-item { background: rgba(0,0,0,0.05); }
+body.light-theme .forward-name { color: #111b21; }
+body.light-theme .forward-phone { color: #667781; }
