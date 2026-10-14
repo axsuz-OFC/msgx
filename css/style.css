@@ -2651,3 +2651,29 @@ body.light-theme .msg-info-header .msg-preview { color: #111b21; background: rgb
 body.light-theme .msg-info-title { color: #111b21; }
 body.light-theme .msg-info-sub { color: #667781; }
 body.light-theme .msg-info-row { border-bottom-color: rgba(0,0,0,0.05); }
+/* ===== PROFILE PHOTO FIXES ===== */
+.chat-avatar,
+.chat-view-header .avatar,
+.profile-avatar-big,
+.group-avatar-big,
+.forward-avatar,
+.member-avatar {
+    overflow: hidden !important;
+    position: relative;
+}
+
+.chat-avatar img,
+.chat-view-header .avatar img,
+.profile-avatar-big img,
+.group-avatar-big img,
+.forward-avatar img,
+.member-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

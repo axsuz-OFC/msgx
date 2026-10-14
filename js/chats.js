@@ -40,7 +40,14 @@ const ChatsStorage = {
         contacts = contacts.filter(c => c.id != id);
         ChatsStorage.saveContacts(contacts);
         localStorage.removeItem('msgx_msgs_' + id);
+        localStorage.removeItem('msgx_photo_' + id);
+        localStorage.removeItem('msgx_group_photo_' + id);
     },
+
+    // ===== PROFILE PHOTOS =====
+    getContactPhoto: (contactId) => localStorage.getItem('msgx_photo_' + contactId),
+    saveContactPhoto: (contactId, base64) => localStorage.setItem('msgx_photo_' + contactId, base64),
+    removeContactPhoto: (contactId) => localStorage.removeItem('msgx_photo_' + contactId),
 
     // ===== MESSAGES =====
     getMessages: (contactId) => JSON.parse(localStorage.getItem('msgx_msgs_' + contactId) || '[]'),
@@ -135,15 +142,7 @@ const ChatsStorage = {
     saveScheduledMessages: (msgs) => localStorage.setItem('msgx_scheduled', JSON.stringify(msgs)),
     addScheduledMessage: (contactId, text, sendAt, type = 'text', extra = {}) => {
         const scheduled = ChatsStorage.getScheduledMessages();
-        const msg = {
-            id: Date.now(),
-            contactId,
-            text,
-            sendAt,
-            type,
-            extra,
-            createdAt: new Date().toISOString()
-        };
+        const msg = { id: Date.now(), contactId, text, sendAt, type, extra, createdAt: new Date().toISOString() };
         scheduled.push(msg);
         ChatsStorage.saveScheduledMessages(scheduled);
         return msg;

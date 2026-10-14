@@ -204,13 +204,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!contact) { window.location.href = 'index.html'; return; }
 
     const groupPhoto = contact.isGroup ? localStorage.getItem('msgx_group_photo_' + contactId) : null;
+    const contactPhoto = !contact.isGroup ? ChatsStorage.getContactPhoto(contactId) : null;
+    const savedPhoto = groupPhoto || contactPhoto;
+
     let icon;
-    if (contact.isGroup) {
-        if (groupPhoto) {
-            icon = `<img src="${groupPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        } else {
-            icon = '<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#fff;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
-        }
+    if (savedPhoto) {
+        icon = `<img src="${savedPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else if (contact.isGroup) {
+        icon = '<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#fff;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>';
     } else {
         icon = contact.name.charAt(0).toUpperCase();
     }
@@ -220,8 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <a href="index.html" class="back">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
         </a>
-        <div class="avatar" style="background:${getAvatarColor(contact.name)}">${icon}</div>
-        <div class="info" ${isGroupChat ? 'onclick="window.location.href=\'group-info.html?id=' + contactId + '\'" style="cursor:pointer;"' : ''}>
+        <div class="avatar" style="background:${getAvatarColor(contact.name)};cursor:pointer;overflow:hidden;" onclick="openContactProfile()">${icon}</div>
+        <div class="info" onclick="openContactProfile()" style="cursor:pointer;">
             <div class="name">${contact.name}</div>
             <div class="status" id="chatStatus">${contact.isGroup ? (contact.members.length + ' members') : (contact.phone || 'online')}</div>
         </div>
@@ -274,6 +275,14 @@ function getAvatarColor(name) {
 
 function startAudioCallFromChat() { window.location.href = 'calls.html?call=' + contactId + '&type=audio'; }
 function startVideoCallFromChat() { window.location.href = 'calls.html?call=' + contactId + '&type=video'; }
+
+function openContactProfile() {
+    if (contact.isGroup) {
+        window.location.href = 'group-info.html?id=' + contactId;
+    } else {
+        window.location.href = 'profile.html?id=' + contactId;
+    }
+}
 
 function toggleEmojiPicker() {
     document.getElementById('emojiPicker').classList.toggle('show');
@@ -495,7 +504,6 @@ function renderMessages() {
             reactionsHtml += '</div>';
         }
 
-        // Ticks (Sent/Delivered/Read)
         const sentTime = new Date(m.date);
         const elapsed = (Date.now() - sentTime.getTime()) / 1000;
         let tickHtml = '';
