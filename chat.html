@@ -137,41 +137,24 @@
     <div class="modal-content">
         <h2>Schedule Message</h2>
         <p style="color:#8888bb;font-size:12px;margin-bottom:15px;">When should this message be sent?</p>
-
         <div class="schedule-options">
             <button class="schedule-option" data-offset="60000" onclick="selectSchedule(this, 60000)">
                 <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                <div class="opt-text">
-                    <div>In 1 minute</div>
-                    <div class="opt-time" id="time_60s"></div>
-                </div>
+                <div class="opt-text"><div>In 1 minute</div><div class="opt-time" id="time_60s"></div></div>
             </button>
-
             <button class="schedule-option" data-offset="300000" onclick="selectSchedule(this, 300000)">
                 <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                <div class="opt-text">
-                    <div>In 5 minutes</div>
-                    <div class="opt-time" id="time_5m"></div>
-                </div>
+                <div class="opt-text"><div>In 5 minutes</div><div class="opt-time" id="time_5m"></div></div>
             </button>
-
             <button class="schedule-option" data-offset="3600000" onclick="selectSchedule(this, 3600000)">
                 <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                <div class="opt-text">
-                    <div>In 1 hour</div>
-                    <div class="opt-time" id="time_1h"></div>
-                </div>
+                <div class="opt-text"><div>In 1 hour</div><div class="opt-time" id="time_1h"></div></div>
             </button>
-
             <button class="schedule-option" data-offset="86400000" onclick="selectSchedule(this, 86400000)">
                 <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                <div class="opt-text">
-                    <div>Tomorrow</div>
-                    <div class="opt-time" id="time_1d"></div>
-                </div>
+                <div class="opt-text"><div>Tomorrow</div><div class="opt-time" id="time_1d"></div></div>
             </button>
         </div>
-
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeModal('scheduleModal')">Cancel</button>
             <button class="btn-save" onclick="confirmSchedule()" id="scheduleConfirmBtn" disabled style="opacity:0.5;">Schedule</button>
@@ -274,7 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         const sent = ChatsStorage.processScheduledMessages();
         if (sent > 0) renderMessages();
-    }, 10000);
+        else renderMessages();
+    }, 5000);
 });
 
 function getAvatarColor(name) {
@@ -511,13 +495,23 @@ function renderMessages() {
             reactionsHtml += '</div>';
         }
 
+        // Ticks (Sent/Delivered/Read)
+        const sentTime = new Date(m.date);
+        const elapsed = (Date.now() - sentTime.getTime()) / 1000;
+        let tickHtml = '';
+        if (m.sent) {
+            if (elapsed < 1) tickHtml = ' ✓';
+            else if (elapsed < 3) tickHtml = ' ✓✓';
+            else tickHtml = ' <span style="color:#00aaff;">✓✓</span>';
+        }
+
         const rgbClass = (rgbOn && m.type === 'text' && !m.deleted) ? 'rgb-active' : '';
         return `<div class="msg ${m.sent ? 'sent' : 'received'} ${rgbClass}" data-msg-id="${m.id}">
             ${forwardedHtml}
             ${quotedHtml}
             ${content}
             ${reactionsHtml}
-            <span class="time">${m.time}${m.sent ? ' ✓✓' : ''}${m.edited ? ' <span class="edited-label">(edited)</span>' : ''}</span>
+            <span class="time">${m.time}${tickHtml}${m.edited ? ' <span class="edited-label">(edited)</span>' : ''}</span>
             <div class="reply-icon">
                 <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
             </div>
@@ -603,6 +597,176 @@ function renderMessages() {
     }
 }
 
+// ===== MESSAGE INFO =====
+function openMsgInfo(msgId) {
+    const msgs = ChatsStorage.getMessages(contactId);
+    const msg = msgs.find(m => m.id === msgId);
+    if (!msg) return;
+
+    closeModal('msgMenuModal');
+
+    const sentTime = new Date(msg.date);
+    const now = new Date();
+    const elapsed = (now - sentTime) / 1000;
+
+    const deliveredTime = new Date(sentTime.getTime() + 1000);
+    const readTime = new Date(sentTime.getTime() + 3000);
+
+    let statusText = 'Sent';
+    let statusClass = 'sent';
+    if (elapsed > 3) {
+        statusText = 'Read';
+        statusClass = 'read';
+    } else if (elapsed > 1) {
+        statusText = 'Delivered';
+        statusClass = 'delivered';
+    }
+
+    const formatTime = (d) => d.toLocaleString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short', year: 'numeric' });
+
+    const typeLabels = {
+        'text': 'Text Message',
+        'image': 'Photo',
+        'video': 'Video',
+        'voice': 'Voice Message',
+        'audio': 'Audio',
+        'document': 'Document',
+        'contact': 'Contact',
+        'poll': 'Poll'
+    };
+    const typeLabel = typeLabels[msg.type] || 'Text Message';
+
+    const charCount = (msg.text || '').length;
+    const wordCount = (msg.text || '').trim().split(/\s+/).filter(w => w.length > 0).length;
+
+    const preview = msg.type === 'text' || !msg.type ? (msg.text || '(empty)') : 
+                    msg.type === 'voice' || msg.type === 'audio' ? '🎤 Voice Message' :
+                    msg.type === 'image' ? '📷 Photo' :
+                    msg.type === 'video' ? '🎥 Video' :
+                    msg.type === 'document' ? '📄 Document' :
+                    msg.type === 'poll' ? '📊 Poll: ' + (msg.text || '') :
+                    msg.type === 'contact' ? '👤 Contact' : '(Message)';
+
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'msgInfoModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Message Info</h2>
+
+            <div class="msg-info-header">
+                <div class="msg-preview">${formatText(preview)}</div>
+                <div class="msg-info-status ${statusClass}">${statusText}</div>
+            </div>
+
+            ${msg.sent ? `
+            <div class="msg-info-row">
+                <div class="msg-info-icon sent">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Sent</div>
+                    <div class="msg-info-sub">${formatTime(sentTime)}</div>
+                </div>
+            </div>
+
+            <div class="msg-info-row">
+                <div class="msg-info-icon delivered">
+                    <svg viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Delivered</div>
+                    <div class="msg-info-sub">${elapsed > 1 ? formatTime(deliveredTime) : 'Pending...'}</div>
+                </div>
+            </div>
+
+            <div class="msg-info-row">
+                <div class="msg-info-icon read">
+                    <svg viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Read</div>
+                    <div class="msg-info-sub">${elapsed > 3 ? formatTime(readTime) : 'Pending...'}</div>
+                </div>
+            </div>
+            ` : `
+            <div class="msg-info-row">
+                <div class="msg-info-icon sent">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Received</div>
+                    <div class="msg-info-sub">${formatTime(sentTime)}</div>
+                </div>
+            </div>
+            `}
+
+            <div class="msg-info-row">
+                <div class="msg-info-icon type">
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Type</div>
+                    <div class="msg-info-sub">${typeLabel}</div>
+                </div>
+            </div>
+
+            ${(msg.type === 'text' || !msg.type) ? `
+            <div class="msg-info-row">
+                <div class="msg-info-icon length">
+                    <svg viewBox="0 0 24 24"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Length</div>
+                    <div class="msg-info-sub">${charCount} characters • ${wordCount} words</div>
+                </div>
+            </div>
+            ` : ''}
+
+            ${msg.starred ? `
+            <div class="msg-info-row">
+                <div class="msg-info-icon star">
+                    <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Starred</div>
+                    <div class="msg-info-sub">This message is starred</div>
+                </div>
+            </div>
+            ` : ''}
+
+            ${msg.edited ? `
+            <div class="msg-info-row">
+                <div class="msg-info-icon type">
+                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Edited</div>
+                    <div class="msg-info-sub">This message was edited</div>
+                </div>
+            </div>
+            ` : ''}
+
+            ${msg.forwarded ? `
+            <div class="msg-info-row">
+                <div class="msg-info-icon type">
+                    <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
+                </div>
+                <div class="msg-info-text">
+                    <div class="msg-info-title">Forwarded</div>
+                    <div class="msg-info-sub">This message was forwarded</div>
+                </div>
+            </div>
+            ` : ''}
+
+            <div class="modal-buttons" style="margin-top:15px;">
+                <button class="btn-cancel" onclick="closeModal('msgInfoModal')">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
 // ===== SCHEDULED MESSAGES =====
 function openScheduleModal() {
     const text = document.getElementById('msgInput').value.trim();
@@ -642,15 +806,12 @@ function confirmSchedule() {
     if (!selectedScheduleOffset) return;
     const text = document.getElementById('msgInput').value.trim();
     if (!text) { alert('Message is empty'); return; }
-
     const sendAt = Date.now() + selectedScheduleOffset;
     ChatsStorage.addScheduledMessage(contactId, text, sendAt);
-    
     document.getElementById('msgInput').value = '';
     handleInputChange();
     closeModal('scheduleModal');
     renderMessages();
-    
     const when = new Date(sendAt).toLocaleString();
     alert('Message scheduled for:\n' + when);
 }
@@ -658,7 +819,6 @@ function confirmSchedule() {
 function showPendingMessages() {
     const pending = ChatsStorage.getScheduledForContact(contactId);
     const list = document.getElementById('pendingList');
-    
     if (pending.length === 0) {
         list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No pending messages</p>';
     } else {
@@ -717,27 +877,20 @@ function closeChatSearch() {
 function performChatSearch() {
     const query = document.getElementById('chatSearchInput').value.trim();
     const messages = ChatsStorage.getMessages(contactId);
-
     document.querySelectorAll('.msg').forEach(el => {
         el.classList.remove('search-hidden', 'search-active-match');
     });
-
     if (!query) {
         document.getElementById('searchCount').textContent = '0/0';
         searchMatches = [];
         currentMatchIndex = 0;
         return;
     }
-
     const lowerQuery = query.toLowerCase();
     searchMatches = [];
-
     messages.forEach(m => {
-        if (m.text && m.text.toLowerCase().includes(lowerQuery)) {
-            searchMatches.push(m.id);
-        }
+        if (m.text && m.text.toLowerCase().includes(lowerQuery)) searchMatches.push(m.id);
     });
-
     document.querySelectorAll('.msg').forEach(el => {
         const msgId = parseInt(el.dataset.msgId);
         if (searchMatches.includes(msgId)) {
@@ -746,7 +899,6 @@ function performChatSearch() {
             el.classList.add('search-hidden');
         }
     });
-
     currentMatchIndex = 0;
     updateSearchCount();
     scrollToCurrentMatch();
@@ -754,11 +906,8 @@ function performChatSearch() {
 
 function updateSearchCount() {
     const count = document.getElementById('searchCount');
-    if (searchMatches.length === 0) {
-        count.textContent = '0/0';
-    } else {
-        count.textContent = (currentMatchIndex + 1) + '/' + searchMatches.length;
-    }
+    if (searchMatches.length === 0) count.textContent = '0/0';
+    else count.textContent = (currentMatchIndex + 1) + '/' + searchMatches.length;
 }
 
 function nextSearchMatch() {
@@ -974,9 +1123,7 @@ function sendMessage() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (!text) return;
-
     ChatsStorage.addMessage(contactId, text, true);
-
     if (replyToMsgId) {
         const msgs = ChatsStorage.getMessages(contactId);
         const lastMsg = msgs[msgs.length - 1];
@@ -984,12 +1131,10 @@ function sendMessage() {
         ChatsStorage.saveMessages(contactId, msgs);
         cancelReply();
     }
-
     input.value = '';
     handleInputChange();
     stopTypingIndicator();
     renderMessages();
-
     setTimeout(() => {
         localStorage.setItem('msgx_sim_typing_' + contactId, 'true');
         renderMessages();
@@ -1035,6 +1180,10 @@ function openMsgMenu(msgId) {
                 <button onclick="copyMsg(${msgId})" style="padding:14px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#8800ff;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                     Copy Text
+                </button>
+                <button onclick="openMsgInfo(${msgId})" style="padding:14px;background:rgba(0,170,255,0.1);color:#00aaff;border:1px solid #00aaff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#00aaff;"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    Message Info
                 </button>
                 ` : ''}
 
@@ -1234,7 +1383,7 @@ function copyMsg(msgId) {
 function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('show');
-    if (modal && modal.parentNode && (id === 'msgMenuModal' || id === 'editMsgModal' || id === 'forwardModal')) modal.remove();
+    if (modal && modal.parentNode && (id === 'msgMenuModal' || id === 'editMsgModal' || id === 'forwardModal' || id === 'msgInfoModal')) modal.remove();
 }
 
 document.addEventListener('click', (e) => {

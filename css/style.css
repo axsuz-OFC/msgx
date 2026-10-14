@@ -2572,3 +2572,82 @@ body.light-theme .scheduled-item {
 body.light-theme .scheduled-item-text {
     color: #111b21;
 }
+/* ===== MESSAGE INFO ===== */
+.msg-info-header {
+    text-align: center;
+    padding: 20px;
+    background: rgba(136,0,255,0.1);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.msg-info-header .msg-preview {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.msg-info-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(136,0,255,0.1);
+}
+
+.msg-info-row:last-child { border-bottom: none; }
+
+.msg-info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.msg-info-icon svg { width: 20px; height: 20px; }
+.msg-info-icon.sent { background: rgba(0,170,255,0.15); }
+.msg-info-icon.sent svg { fill: #00aaff; }
+.msg-info-icon.delivered { background: rgba(0,255,136,0.15); }
+.msg-info-icon.delivered svg { fill: #00ff88; }
+.msg-info-icon.read { background: rgba(0,170,255,0.15); }
+.msg-info-icon.read svg { fill: #00aaff; }
+.msg-info-icon.type { background: rgba(255,170,0,0.15); }
+.msg-info-icon.type svg { fill: #ffaa00; }
+.msg-info-icon.star { background: rgba(255,221,0,0.15); }
+.msg-info-icon.star svg { fill: #ffdd00; }
+.msg-info-icon.length { background: rgba(136,0,255,0.15); }
+.msg-info-icon.length svg { fill: #8800ff; }
+
+.msg-info-text { flex: 1; min-width: 0; }
+.msg-info-title { color: #fff; font-size: 14px; font-weight: 600; }
+.msg-info-sub { color: #8888bb; font-size: 12px; margin-top: 3px; }
+
+.msg-info-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.msg-info-status.sent { background: rgba(0,170,255,0.15); color: #00aaff; }
+.msg-info-status.delivered { background: rgba(0,255,136,0.15); color: #00ff88; }
+.msg-info-status.read { background: rgba(0,170,255,0.2); color: #00aaff; }
+.msg-info-status.pending { background: rgba(255,170,0,0.15); color: #ffaa00; }
+
+body.light-theme .msg-info-header { background: rgba(136,0,255,0.08); }
+body.light-theme .msg-info-header .msg-preview { color: #111b21; background: rgba(0,0,0,0.05); }
+body.light-theme .msg-info-title { color: #111b21; }
+body.light-theme .msg-info-sub { color: #667781; }
+body.light-theme .msg-info-row { border-bottom-color: rgba(0,0,0,0.05); }
