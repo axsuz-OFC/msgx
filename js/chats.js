@@ -49,7 +49,7 @@ const ChatsStorage = {
         const msgs = ChatsStorage.getMessages(contactId);
         const now = new Date();
         const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        const msg = { id: Date.now(), text, sent, time, sender, type, extra, read: sent, starred: false, date: now.toISOString() };
+        const msg = { id: Date.now() + Math.floor(Math.random() * 1000), text, sent, time, sender, type, extra, read: sent, starred: false, date: now.toISOString() };
         msgs.push(msg);
         ChatsStorage.saveMessages(contactId, msgs);
         return msg;
@@ -129,6 +129,49 @@ const ChatsStorage = {
     // ===== THEME =====
     getTheme: () => localStorage.getItem('msgx_theme') || 'dark',
     setTheme: (theme) => localStorage.setItem('msgx_theme', theme),
+
+    // ===== SCHEDULED MESSAGES =====
+    getScheduledMessages: () => JSON.parse(localStorage.getItem('msgx_scheduled') || '[]'),
+    saveScheduledMessages: (msgs) => localStorage.setItem('msgx_scheduled', JSON.stringify(msgs)),
+    addScheduledMessage: (contactId, text, sendAt, type = 'text', extra = {}) => {
+        const scheduled = ChatsStorage.getScheduledMessages();
+        const msg = {
+            id: Date.now(),
+            contactId,
+            text,
+            sendAt,
+            type,
+            extra,
+            createdAt: new Date().toISOString()
+        };
+        scheduled.push(msg);
+        ChatsStorage.saveScheduledMessages(scheduled);
+        return msg;
+    },
+    removeScheduledMessage: (id) => {
+        let scheduled = ChatsStorage.getScheduledMessages();
+        scheduled = scheduled.filter(m => m.id !== id);
+        ChatsStorage.saveScheduledMessages(scheduled);
+    },
+    getScheduledForContact: (contactId) => {
+        return ChatsStorage.getScheduledMessages().filter(m => String(m.contactId) === String(contactId));
+    },
+    processScheduledMessages: () => {
+        const now = Date.now();
+        const scheduled = ChatsStorage.getScheduledMessages();
+        const pending = [];
+        let sent = 0;
+        scheduled.forEach(m => {
+            if (m.sendAt <= now) {
+                ChatsStorage.addMessage(m.contactId, m.text, true, 'Me', m.type, m.extra);
+                sent++;
+            } else {
+                pending.push(m);
+            }
+        });
+        if (sent > 0) ChatsStorage.saveScheduledMessages(pending);
+        return sent;
+    },
 
     // ===== BROADCAST =====
     getBroadcasts: () => JSON.parse(localStorage.getItem('msgx_broadcasts') || '[]'),
@@ -233,13 +276,24 @@ function applyTheme() {
         }
     }
 }
-
-// Auto apply on every page load
 applyTheme();
 
-// Listen for system theme changes
 if (window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
         if (localStorage.getItem('msgx_theme') === 'system') applyTheme();
     });
 }
+
+// ===== AUTO-PROCESS SCHEDULED MESSAGES =====
+setInterval(() => {
+    if (typeof ChatsStorage !== 'undefined' && ChatsStorage.processScheduledMessages) {
+        const sent = ChatsStorage.processScheduledMessages();
+        if (sent > 0) console.log(sent + ' scheduled message(s) sent');
+    }
+}, 10000);
+
+setTimeout(() => {
+    if (typeof ChatsStorage !== 'undefined' && ChatsStorage.processScheduledMessages) {
+        ChatsStorage.processScheduledMessages();
+    }
+}, 1000);

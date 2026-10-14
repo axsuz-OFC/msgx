@@ -2428,3 +2428,147 @@ body.light-theme .member-item,
 body.light-theme .select-member-item { background: rgba(0,0,0,0.05); }
 body.light-theme .member-name { color: #111b21; }
 body.light-theme .member-sub { color: #667781; }
+/* ===== SCHEDULED MESSAGES ===== */
+.chat-input-bar .schedule-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.chat-input-bar .schedule-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffaa00;
+}
+
+.schedule-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.schedule-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(136,0,255,0.25);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: #fff;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+}
+
+.schedule-option:active { background: rgba(136,0,255,0.2); }
+
+.schedule-option.selected {
+    background: rgba(136,0,255,0.25);
+    border-color: #8800ff;
+    box-shadow: 0 0 15px rgba(136,0,255,0.4);
+}
+
+.schedule-option svg {
+    width: 20px;
+    height: 20px;
+    fill: #8800ff;
+    flex-shrink: 0;
+}
+
+.schedule-option .opt-text { flex: 1; }
+.schedule-option .opt-time { font-size: 12px; color: #8888bb; margin-top: 2px; }
+
+.scheduled-msg-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255,170,0,0.15);
+    border: 1px dashed rgba(255,170,0,0.5);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #ffaa00;
+}
+
+.scheduled-msg-indicator svg {
+    width: 16px;
+    height: 16px;
+    fill: #ffaa00;
+    flex-shrink: 0;
+}
+
+.scheduled-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid #ffaa00;
+}
+
+.scheduled-item-info { flex: 1; min-width: 0; }
+
+.scheduled-item-text {
+    color: #fff;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scheduled-item-time {
+    color: #ffaa00;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.scheduled-item-cancel {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,50,100,0.15);
+    border: 1px solid #ff3366;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.scheduled-item-cancel svg {
+    width: 16px;
+    height: 16px;
+    fill: #ff3366;
+}
+
+body.light-theme .schedule-option {
+    background: rgba(0,0,0,0.05);
+    color: #111b21;
+}
+
+body.light-theme .schedule-option.selected {
+    background: rgba(136,0,255,0.15);
+}
+
+body.light-theme .scheduled-item {
+    background: rgba(0,0,0,0.05);
+}
+
+body.light-theme .scheduled-item-text {
+    color: #111b21;
+}

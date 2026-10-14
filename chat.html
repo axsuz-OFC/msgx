@@ -76,6 +76,9 @@
             <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
         </button>
         <input type="text" id="msgInput" placeholder="Message" onkeypress="if(event.key==='Enter') sendMessage()" oninput="handleInputChange()">
+        <button class="schedule-btn" id="scheduleBtn" onclick="openScheduleModal()" title="Schedule message" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/></svg>
+        </button>
         <button class="mic-btn" id="micBtn" onclick="startVoiceRecord()">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         </button>
@@ -130,6 +133,62 @@
     </div>
 </div>
 
+<div class="modal" id="scheduleModal">
+    <div class="modal-content">
+        <h2>Schedule Message</h2>
+        <p style="color:#8888bb;font-size:12px;margin-bottom:15px;">When should this message be sent?</p>
+
+        <div class="schedule-options">
+            <button class="schedule-option" data-offset="60000" onclick="selectSchedule(this, 60000)">
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <div class="opt-text">
+                    <div>In 1 minute</div>
+                    <div class="opt-time" id="time_60s"></div>
+                </div>
+            </button>
+
+            <button class="schedule-option" data-offset="300000" onclick="selectSchedule(this, 300000)">
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <div class="opt-text">
+                    <div>In 5 minutes</div>
+                    <div class="opt-time" id="time_5m"></div>
+                </div>
+            </button>
+
+            <button class="schedule-option" data-offset="3600000" onclick="selectSchedule(this, 3600000)">
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <div class="opt-text">
+                    <div>In 1 hour</div>
+                    <div class="opt-time" id="time_1h"></div>
+                </div>
+            </button>
+
+            <button class="schedule-option" data-offset="86400000" onclick="selectSchedule(this, 86400000)">
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <div class="opt-text">
+                    <div>Tomorrow</div>
+                    <div class="opt-time" id="time_1d"></div>
+                </div>
+            </button>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('scheduleModal')">Cancel</button>
+            <button class="btn-save" onclick="confirmSchedule()" id="scheduleConfirmBtn" disabled style="opacity:0.5;">Schedule</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="pendingScheduleModal">
+    <div class="modal-content">
+        <h2>Pending Messages</h2>
+        <div id="pendingList" style="max-height:400px;overflow-y:auto;margin-bottom:15px;"></div>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('pendingScheduleModal')">Close</button>
+        </div>
+    </div>
+</div>
+
 <input type="file" id="fileInput" style="display:none;">
 
 <script src="js/chats.js"></script>
@@ -148,6 +207,7 @@ let forwardMsgId = null;
 let forwardSelected = [];
 let searchMatches = [];
 let currentMatchIndex = 0;
+let selectedScheduleOffset = null;
 
 const EMOJIS = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','😈','👿','👹','👺','🤡','💩','👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾','👋','🤚','🖐️','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋','🩸'];
 
@@ -186,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button onclick="toggleChatSearch()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;">
                 <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#00aaff;"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             </button>
+            <button onclick="showPendingMessages()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;">
+                <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#ffaa00;"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+            </button>
             ${isGroupChat ? `
             <button onclick="window.location.href='group-info.html?id=${contactId}'" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;">
                 <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#00ff88;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
@@ -207,6 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
     msgInput.addEventListener('input', () => showTypingIndicator());
 
     renderMessages();
+
+    setInterval(() => {
+        const sent = ChatsStorage.processScheduledMessages();
+        if (sent > 0) renderMessages();
+    }, 10000);
 });
 
 function getAvatarColor(name) {
@@ -283,8 +351,16 @@ function handleInputChange() {
     const text = document.getElementById('msgInput').value.trim();
     const micBtn = document.getElementById('micBtn');
     const sendBtn = document.getElementById('sendBtn');
-    if (text.length > 0) { micBtn.style.display = 'none'; sendBtn.style.display = 'flex'; }
-    else { micBtn.style.display = 'flex'; sendBtn.style.display = 'none'; }
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    if (text.length > 0) {
+        micBtn.style.display = 'none';
+        sendBtn.style.display = 'flex';
+        scheduleBtn.style.display = 'flex';
+    } else {
+        micBtn.style.display = 'flex';
+        sendBtn.style.display = 'none';
+        scheduleBtn.style.display = 'none';
+    }
 }
 
 function toggleAttachMenu() {
@@ -347,13 +423,31 @@ function renderMessages() {
     const container = document.getElementById('chatMessages');
     const messages = ChatsStorage.getMessages(contactId);
     const rgbOn = localStorage.getItem('msgx_rgb') !== 'false';
+    const pendingScheduled = ChatsStorage.getScheduledForContact(contactId);
 
-    if (messages.length === 0) {
+    if (messages.length === 0 && pendingScheduled.length === 0) {
         container.innerHTML = `<div style="text-align:center;color:#6666aa;font-size:12px;padding:20px;">Messages are end-to-end encrypted</div>`;
         return;
     }
 
-    container.innerHTML = messages.map(m => {
+    let html = '';
+
+    if (pendingScheduled.length > 0) {
+        html += pendingScheduled.map(s => {
+            const when = new Date(s.sendAt);
+            const timeStr = when.toLocaleString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+            return `<div class="msg sent" style="opacity:0.85;border:1px dashed #ffaa00;">
+                <div class="scheduled-msg-indicator">
+                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                    Scheduled for ${timeStr}
+                </div>
+                <span class="msg-text-content">${formatText(s.text)}</span>
+                <span class="time">Pending</span>
+            </div>`;
+        }).join('');
+    }
+
+    html += messages.map(m => {
         let content = '';
         let quotedHtml = '';
         let forwardedHtml = '';
@@ -430,6 +524,8 @@ function renderMessages() {
         </div>`;
     }).join('');
 
+    container.innerHTML = html;
+
     const otherTyping = localStorage.getItem('msgx_sim_typing_' + contactId) === 'true';
     if (otherTyping && messages.length > 0) {
         container.innerHTML += `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
@@ -465,7 +561,7 @@ function renderMessages() {
         el.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
             pressTimer = setTimeout(() => {
-                if (!isSwiping) openMsgMenu(msgId);
+                if (!isSwiping && msgId) openMsgMenu(msgId);
             }, 600);
         });
 
@@ -497,7 +593,7 @@ function renderMessages() {
 
         el.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            openMsgMenu(msgId);
+            if (msgId) openMsgMenu(msgId);
         });
     });
 
@@ -505,6 +601,90 @@ function renderMessages() {
     if (searchInput && searchInput.value.trim() && document.getElementById('chatSearchBar').classList.contains('show')) {
         setTimeout(() => performChatSearch(), 50);
     }
+}
+
+// ===== SCHEDULED MESSAGES =====
+function openScheduleModal() {
+    const text = document.getElementById('msgInput').value.trim();
+    if (!text) { alert('Please type a message first'); return; }
+    selectedScheduleOffset = null;
+    document.querySelectorAll('.schedule-option').forEach(el => el.classList.remove('selected'));
+    document.getElementById('scheduleConfirmBtn').disabled = true;
+    document.getElementById('scheduleConfirmBtn').style.opacity = '0.5';
+    updateScheduleTimes();
+    document.getElementById('scheduleModal').classList.add('show');
+}
+
+function updateScheduleTimes() {
+    const now = new Date();
+    const times = [
+        { id: 'time_60s', offset: 60000 },
+        { id: 'time_5m', offset: 300000 },
+        { id: 'time_1h', offset: 3600000 },
+        { id: 'time_1d', offset: 86400000 }
+    ];
+    times.forEach(t => {
+        const future = new Date(now.getTime() + t.offset);
+        const el = document.getElementById(t.id);
+        if (el) el.textContent = future.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    });
+}
+
+function selectSchedule(el, offset) {
+    selectedScheduleOffset = offset;
+    document.querySelectorAll('.schedule-option').forEach(opt => opt.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('scheduleConfirmBtn').disabled = false;
+    document.getElementById('scheduleConfirmBtn').style.opacity = '1';
+}
+
+function confirmSchedule() {
+    if (!selectedScheduleOffset) return;
+    const text = document.getElementById('msgInput').value.trim();
+    if (!text) { alert('Message is empty'); return; }
+
+    const sendAt = Date.now() + selectedScheduleOffset;
+    ChatsStorage.addScheduledMessage(contactId, text, sendAt);
+    
+    document.getElementById('msgInput').value = '';
+    handleInputChange();
+    closeModal('scheduleModal');
+    renderMessages();
+    
+    const when = new Date(sendAt).toLocaleString();
+    alert('Message scheduled for:\n' + when);
+}
+
+function showPendingMessages() {
+    const pending = ChatsStorage.getScheduledForContact(contactId);
+    const list = document.getElementById('pendingList');
+    
+    if (pending.length === 0) {
+        list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No pending messages</p>';
+    } else {
+        list.innerHTML = pending.sort((a, b) => a.sendAt - b.sendAt).map(m => {
+            const when = new Date(m.sendAt);
+            const timeStr = when.toLocaleString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+            return `<div class="scheduled-item">
+                <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#ffaa00;flex-shrink:0;"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                <div class="scheduled-item-info">
+                    <div class="scheduled-item-text">${m.text}</div>
+                    <div class="scheduled-item-time">${timeStr}</div>
+                </div>
+                <button class="scheduled-item-cancel" onclick="cancelScheduled(${m.id})">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('pendingScheduleModal').classList.add('show');
+}
+
+function cancelScheduled(id) {
+    if (!confirm('Cancel this scheduled message?')) return;
+    ChatsStorage.removeScheduledMessage(id);
+    showPendingMessages();
+    renderMessages();
 }
 
 // ===== IN-CHAT SEARCH =====
@@ -600,7 +780,6 @@ function scrollToCurrentMatch() {
     const msgId = searchMatches[currentMatchIndex];
     const el = document.querySelector(`.msg[data-msg-id="${msgId}"]`);
     if (!el) return;
-
     document.querySelectorAll('.msg').forEach(m => m.classList.remove('search-active-match'));
     el.classList.add('search-active-match');
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -623,7 +802,6 @@ function toggleVoicePlay(msgId) {
     const audio = document.getElementById('audio_' + msgId);
     const icon = document.getElementById('playIcon_' + msgId);
     if (!audio) return;
-
     document.querySelectorAll('audio').forEach(a => {
         if (a.id !== 'audio_' + msgId && !a.paused) {
             a.pause();
@@ -632,7 +810,6 @@ function toggleVoicePlay(msgId) {
             if (otherIcon) otherIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
         }
     });
-
     if (audio.paused) {
         audio.play();
         icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
@@ -648,15 +825,10 @@ function updateVoiceProgress(msgId) {
     const waveform = document.getElementById('waveform_' + msgId);
     const timeEl = document.getElementById('time_' + msgId);
     if (!audio || !waveform) return;
-
     const progress = audio.currentTime / audio.duration;
     const bars = waveform.querySelectorAll('.bar');
     const playedCount = Math.floor(progress * bars.length);
-
-    bars.forEach((bar, i) => {
-        bar.classList.toggle('played', i < playedCount);
-    });
-
+    bars.forEach((bar, i) => bar.classList.toggle('played', i < playedCount));
     if (timeEl) {
         const cur = Math.floor(audio.currentTime);
         const total = Math.floor(audio.duration) || 0;
@@ -668,7 +840,6 @@ function seekVoice(event, msgId) {
     const audio = document.getElementById('audio_' + msgId);
     const waveform = document.getElementById('waveform_' + msgId);
     if (!audio || !waveform || !audio.duration) return;
-
     const rect = waveform.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const percent = x / rect.width;
@@ -682,13 +853,9 @@ function resetVoicePlayer(msgId) {
     const timeEl = document.getElementById('time_' + msgId);
     const waveform = document.getElementById('waveform_' + msgId);
     if (!audio) return;
-
     audio.currentTime = 0;
     if (icon) icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-
-    if (waveform) {
-        waveform.querySelectorAll('.bar').forEach(bar => bar.classList.remove('played'));
-    }
+    if (waveform) waveform.querySelectorAll('.bar').forEach(bar => bar.classList.remove('played'));
     if (timeEl) {
         const dur = Math.floor(audio.duration) || 0;
         timeEl.textContent = '0:' + dur.toString().padStart(2, '0');
@@ -699,13 +866,11 @@ function changeVoiceSpeed(msgId) {
     const audio = document.getElementById('audio_' + msgId);
     const speedEl = document.getElementById('speed_' + msgId);
     if (!audio || !speedEl) return;
-
     const speeds = [1, 1.5, 2];
     let current = audioSpeeds[msgId] || 1;
     let idx = speeds.indexOf(current);
     idx = (idx + 1) % speeds.length;
     const newSpeed = speeds[idx];
-
     audioSpeeds[msgId] = newSpeed;
     audio.playbackRate = newSpeed;
     speedEl.textContent = newSpeed + 'x';
@@ -736,20 +901,16 @@ function openReactionPicker(msgId) {
 function addReaction(emoji, msgId = null) {
     const targetId = msgId || reactionTargetMsgId;
     if (!targetId) return;
-
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === targetId);
     if (!msg || msg.deleted) return;
-
     if (!msg.reactions) msg.reactions = {};
-
     if (msg.reactions[emoji]) {
         msg.reactions[emoji]--;
         if (msg.reactions[emoji] <= 0) delete msg.reactions[emoji];
     } else {
         msg.reactions[emoji] = 1;
     }
-
     ChatsStorage.saveMessages(contactId, msgs);
     document.getElementById('reactionPicker').classList.remove('show');
     reactionTargetMsgId = null;
@@ -768,13 +929,10 @@ function showHeartPopup(el) {
 function showTypingIndicator() {
     const statusEl = document.getElementById('chatStatus');
     if (!statusEl) return;
-
     statusEl.innerHTML = `typing<span class="typing-dots"><span></span><span></span><span></span></span>`;
     statusEl.classList.add('typing');
-
     localStorage.setItem('msgx_typing_' + contactId, 'true');
     localStorage.setItem('msgx_typing_time_' + contactId, Date.now().toString());
-
     if (typingTimeout) clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => stopTypingIndicator(), 2000);
 }
@@ -782,10 +940,8 @@ function showTypingIndicator() {
 function stopTypingIndicator() {
     const statusEl = document.getElementById('chatStatus');
     if (!statusEl) return;
-
     statusEl.classList.remove('typing');
     statusEl.textContent = contact.isGroup ? (contact.members.length + ' members') : (contact.phone || 'online');
-
     localStorage.removeItem('msgx_typing_' + contactId);
     localStorage.removeItem('msgx_typing_time_' + contactId);
     if (typingTimeout) clearTimeout(typingTimeout);
@@ -917,10 +1073,8 @@ function openForwardPicker(msgId) {
     forwardMsgId = msgId;
     forwardSelected = [];
     closeModal('msgMenuModal');
-
     const contacts = ChatsStorage.getContacts();
     const list = document.getElementById('forwardContactList');
-
     if (contacts.length === 0) {
         list.innerHTML = '<p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No contacts available</p>';
     } else {
@@ -938,7 +1092,6 @@ function openForwardPicker(msgId) {
             </div>`;
         }).join('');
     }
-
     updateForwardBtn();
     document.getElementById('forwardModal').classList.add('show');
 }
@@ -947,7 +1100,6 @@ function toggleForwardContact(id) {
     const idx = forwardSelected.indexOf(id);
     if (idx >= 0) forwardSelected.splice(idx, 1);
     else forwardSelected.push(id);
-
     const check = document.getElementById('fcheck_' + id);
     const item = check.parentElement;
     if (forwardSelected.includes(id)) {
@@ -975,11 +1127,9 @@ function updateForwardBtn() {
 
 function forwardMessage() {
     if (forwardSelected.length === 0) return;
-
     const msgs = ChatsStorage.getMessages(contactId);
     const originalMsg = msgs.find(m => m.id === forwardMsgId);
     if (!originalMsg) return;
-
     forwardSelected.forEach(targetId => {
         const targetMsgs = ChatsStorage.getMessages(targetId);
         const now = new Date();
@@ -1000,7 +1150,6 @@ function forwardMessage() {
         targetMsgs.push(newMsg);
         ChatsStorage.saveMessages(targetId, targetMsgs);
     });
-
     closeModal('forwardModal');
     alert('Forwarded to ' + forwardSelected.length + ' contact' + (forwardSelected.length > 1 ? 's' : ''));
 }
@@ -1009,9 +1158,7 @@ function openEditMsg(msgId) {
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === msgId);
     if (!msg || !msg.sent || msg.deleted) return;
-
     closeModal('msgMenuModal');
-
     const modal = document.createElement('div');
     modal.className = 'modal show';
     modal.id = 'editMsgModal';
@@ -1035,11 +1182,9 @@ function openEditMsg(msgId) {
 function saveEditMsg(msgId) {
     const newText = document.getElementById('editMsgInput').value.trim();
     if (!newText) { alert('Message cannot be empty'); return; }
-
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === msgId);
     if (!msg) return;
-
     msg.text = newText;
     msg.edited = true;
     ChatsStorage.saveMessages(contactId, msgs);
@@ -1059,7 +1204,6 @@ function deleteForEveryone(msgId) {
     const msgs = ChatsStorage.getMessages(contactId);
     const msg = msgs.find(m => m.id === msgId);
     if (!msg) return;
-
     msg.deleted = true;
     msg.text = '';
     msg.reactions = {};
