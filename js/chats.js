@@ -224,6 +224,131 @@ const ChatsStorage = {
         ChatsStorage.saveStatuses(active);
     },
 
+    // ===== CHANNELS =====
+    getChannels: () => JSON.parse(localStorage.getItem('msgx_channels') || '[]'),
+    saveChannels: (c) => localStorage.setItem('msgx_channels', JSON.stringify(c)),
+    createChannel: (name, description, isVerified = false) => {
+        const channels = ChatsStorage.getChannels();
+        const user = ChatsStorage.getCurrentUser();
+        const channel = {
+            id: Date.now(),
+            name,
+            description: description || '',
+            isVerified,
+            ownerId: user ? user.id : null,
+            ownerName: user ? (user.name || user.username) : 'Me',
+            admins: user ? [user.id] : [],
+            followers: [],
+            muted: false,
+            createdAt: new Date().toISOString()
+        };
+        channels.push(channel);
+        ChatsStorage.saveChannels(channels);
+        return channel;
+    },
+    getChannel: (id) => ChatsStorage.getChannels().find(c => c.id == id),
+    updateChannel: (id, updates) => {
+        const channels = ChatsStorage.getChannels();
+        const idx = channels.findIndex(c => c.id == id);
+        if (idx >= 0) {
+            channels[idx] = { ...channels[idx], ...updates };
+            ChatsStorage.saveChannels(channels);
+        }
+    },
+    deleteChannel: (id) => {
+        let channels = ChatsStorage.getChannels();
+        channels = channels.filter(c => c.id != id);
+        ChatsStorage.saveChannels(channels);
+        localStorage.removeItem('msgx_channel_posts_' + id);
+    },
+    toggleFollowChannel: (id) => {
+        const channels = ChatsStorage.getChannels();
+        const idx = channels.findIndex(c => c.id == id);
+        if (idx < 0) return false;
+        const user = ChatsStorage.getCurrentUser();
+        const userId = user ? user.id : 'guest';
+        const followers = channels[idx].followers || [];
+        if (followers.includes(userId)) {
+            channels[idx].followers = followers.filter(f => f !== userId);
+        } else {
+            channels[idx].followers = [...followers, userId];
+        }
+        ChatsStorage.saveChannels(channels);
+        return channels[idx].followers.includes(userId);
+    },
+    isFollowing: (id) => {
+        const user = ChatsStorage.getCurrentUser();
+        const userId = user ? user.id : 'guest';
+        const channel = ChatsStorage.getChannel(id);
+        return channel ? (channel.followers || []).includes(userId) : false;
+    },
+    isChannelAdmin: (id) => {
+        const user = ChatsStorage.getCurrentUser();
+        const userId = user ? user.id : 'guest';
+        const channel = ChatsStorage.getChannel(id);
+        return channel ? (channel.admins || []).includes(userId) : false;
+    },
+    addChannelAdmin: (channelId, userId) => {
+        const channels = ChatsStorage.getChannels();
+        const idx = channels.findIndex(c => c.id == channelId);
+        if (idx < 0) return;
+        if (!channels[idx].admins) channels[idx].admins = [];
+        if (!channels[idx].admins.includes(userId)) channels[idx].admins.push(userId);
+        ChatsStorage.saveChannels(channels);
+    },
+    removeChannelAdmin: (channelId, userId) => {
+        const channels = ChatsStorage.getChannels();
+        const idx = channels.findIndex(c => c.id == channelId);
+        if (idx < 0) return;
+        channels[idx].admins = (channels[idx].admins || []).filter(a => a !== userId);
+        ChatsStorage.saveChannels(channels);
+    },
+    // Channel posts
+    getChannelPosts: (channelId) => JSON.parse(localStorage.getItem('msgx_channel_posts_' + channelId) || '[]'),
+    saveChannelPosts: (channelId, posts) => localStorage.setItem('msgx_channel_posts_' + channelId, JSON.stringify(posts)),
+    addChannelPost: (channelId, text, type = 'text', extra = {}) => {
+        const posts = ChatsStorage.getChannelPosts(channelId);
+        const now = new Date();
+        const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        const date = now.toLocaleDateString([], { day: '2-digit', month: 'short' });
+        const user = ChatsStorage.getCurrentUser();
+        const post = {
+            id: Date.now(),
+            text, type, extra, time, date,
+            authorId: user ? user.id : null,
+            authorName: user ? (user.name || user.username) : 'Me',
+            reactions: {},
+            createdAt: now.toISOString()
+        };
+        posts.unshift(post);
+        ChatsStorage.saveChannelPosts(channelId, posts);
+        return post;
+    },
+    deleteChannelPost: (channelId, postId) => {
+        let posts = ChatsStorage.getChannelPosts(channelId);
+        posts = posts.filter(p => p.id !== postId);
+        ChatsStorage.saveChannelPosts(channelId, posts);
+    },
+    reactToPost: (channelId, postId, emoji) => {
+        const posts = ChatsStorage.getChannelPosts(channelId);
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+        const user = ChatsStorage.getCurrentUser();
+        const userId = user ? String(user.id) : 'guest';
+        if (!post.reactions) post.reactions = {};
+        if (!post.reactions[emoji]) post.reactions[emoji] = [];
+        if (post.reactions[emoji].includes(userId)) {
+            post.reactions[emoji] = post.reactions[emoji].filter(u => u !== userId);
+            if (post.reactions[emoji].length === 0) delete post.reactions[emoji];
+        } else {
+            post.reactions[emoji].push(userId);
+        }
+        ChatsStorage.saveChannelPosts(channelId, posts);
+        return post;
+    },
+    getChannelPhoto: (channelId) => localStorage.getItem('msgx_channel_photo_' + channelId),
+    saveChannelPhoto: (channelId, base64) => localStorage.setItem('msgx_channel_photo_' + channelId, base64),
+
     // ===== WALLPAPER =====
     getWallpaper: () => localStorage.getItem('msgx_wallpaper'),
     getWallpaperType: () => localStorage.getItem('msgx_wallpaper_type') || 'image',

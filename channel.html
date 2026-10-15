@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Channel - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="channels.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1 id="channelTitle">Channel</h1>
+    <div class="app-bar-actions">
+        <button onclick="toggleChannelMenu()">
+            <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        </button>
+    </div>
+</header>
+
+<div class="dropdown-menu" id="channelMenu">
+    <button onclick="toggleMuteChannel()">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+        Mute Channel
+    </button>
+    <button onclick="window.location.href='channel-info.html?id=' + channelId">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+        Channel Info
+    </button>
+    <button onclick="shareChannel()">
+        <svg viewBox="0 0 24 24" class="menu-icon"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+        Share Channel
+    </button>
+</div>
+
+<main class="container" id="channelContent"></main>
+
+<div class="modal" id="addPostModal">
+    <div class="modal-content">
+        <h2>Add Post</h2>
+        <textarea id="postText" placeholder="Write something..." style="width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:15px;font-family:inherit;outline:none;margin-bottom:12px;min-height:100px;resize:vertical;"></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="file" id="postImageInput" accept="image/*" style="display:none;">
+            <button onclick="document.getElementById('postImageInput').click()" style="flex:1;padding:12px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">Add Image</button>
+        </div>
+        <p id="postImageName" style="color:#8800ff;font-size:11px;text-align:center;margin-bottom:10px;"></p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('addPostModal')">Cancel</button>
+            <button class="btn-save" onclick="submitPost()">Post</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="reactionPickerModal">
+    <div class="modal-content">
+        <h2>React</h2>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:10px 0;">
+            <button onclick="pickReaction('👍')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">👍</button>
+            <button onclick="pickReaction('❤️')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">❤️</button>
+            <button onclick="pickReaction('😂')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">😂</button>
+            <button onclick="pickReaction('😮')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">😮</button>
+            <button onclick="pickReaction('😢')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">😢</button>
+            <button onclick="pickReaction('🙏')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">🙏</button>
+            <button onclick="pickReaction('🔥')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">🔥</button>
+            <button onclick="pickReaction('🎉')" style="font-size:32px;background:transparent;border:none;cursor:pointer;">🎉</button>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('reactionPickerModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="postOptionsModal">
+    <div class="modal-content">
+        <h2>Post Options</h2>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <button onclick="deleteCurrentPost()" style="padding:14px;background:rgba(255,50,100,0.1);color:#ff3366;border:1px solid #ff3366;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Delete Post</button>
+            <button onclick="closeModal('postOptionsModal')" style="padding:14px;background:transparent;color:#8888bb;border:1px solid rgba(136,0,255,0.3);border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/chats.js"></script>
+<script>
+let channelId = null;
+let channel = null;
+let isAdmin = false;
+let isFollowing = false;
+let selectedPostImage = null;
+let reactionTargetPostId = null;
+let postOptionsTargetId = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    loadGlobalWallpaper();
+    const params = new URLSearchParams(window.location.search);
+    channelId = params.get('id');
+    if (!channelId) { window.location.href = 'channels.html'; return; }
+    channel = ChatsStorage.getChannel(channelId);
+    if (!channel) { window.location.href = 'channels.html'; return; }
+    isAdmin = ChatsStorage.isChannelAdmin(channelId);
+    isFollowing = ChatsStorage.isFollowing(channelId);
+    renderChannel();
+});
+
+document.getElementById('postImageInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        selectedPostImage = ev.target.result;
+        document.getElementById('postImageName').textContent = '🖼️ ' + file.name;
+    };
+    reader.readAsDataURL(file);
+});
+
+function renderChannel() {
+    channel = ChatsStorage.getChannel(channelId);
+    isAdmin = ChatsStorage.isChannelAdmin(channelId);
+    isFollowing = ChatsStorage.isFollowing(channelId);
+
+    document.getElementById('channelTitle').textContent = channel.name;
+
+    const photo = ChatsStorage.getChannelPhoto(channelId);
+    const initial = channel.name.charAt(0).toUpperCase();
+    const followers = (channel.followers || []).length;
+    const admins = (channel.admins || []).length;
+    const posts = ChatsStorage.getChannelPosts(channelId);
+
+    const avatarContent = photo ? `<img src="${photo}">` : initial;
+
+    let postsHtml = '';
+    if (posts.length === 0) {
+        postsHtml = `
+            <div class="empty">
+                <p style="color:#6666aa;font-size:13px;">No posts yet</p>
+                ${isAdmin ? '<p style="color:#8888bb;font-size:11px;">Add your first post!</p>' : ''}
+            </div>
+        `;
+    } else {
+        postsHtml = posts.map(p => renderPost(p)).join('');
+    }
+
+    document.getElementById('channelContent').innerHTML = `
+        <div class="channel-view-header">
+            <div class="channel-view-avatar">${avatarContent}</div>
+            <div class="channel-view-name">
+                ${channel.name}
+                ${channel.isVerified ? '<span class="channel-verified" style="width:22px;height:22px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>' : ''}
+            </div>
+            <div class="channel-view-desc">${channel.description || 'No description'}</div>
+            <div class="channel-view-stats">
+                <span><strong>${followers}</strong>Followers</span>
+                <span><strong>${posts.length}</strong>Posts</span>
+                <span><strong>${admins}</strong>Admins</span>
+            </div>
+            <div class="channel-view-actions">
+                ${!isAdmin ? `
+                <button class="channel-action-btn channel-follow-main ${isFollowing ? 'following' : ''}" onclick="toggleFollowChannel()">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    ${isFollowing ? 'Following' : 'Follow'}
+                </button>
+                ` : `
+                <button class="channel-action-btn channel-follow-main" onclick="openAddPost()">
+                    <svg viewBox="0 0 24 24" style="fill:#fff;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Add Post
+                </button>
+                `}
+            </div>
+        </div>
+
+        <div id="channelPosts" style="padding-bottom:100px;">
+            ${postsHtml}
+        </div>
+    `;
+}
+
+function renderPost(p) {
+    const user = ChatsStorage.getCurrentUser();
+    const userId = user ? String(user.id) : 'guest';
+
+    let content = formatText(p.text || '');
+
+    if (p.type === 'image' && p.extra && p.extra.fileData) {
+        content += `<img src="${p.extra.fileData}" style="width:100%;max-width:100%;border-radius:10px;margin-top:8px;">`;
+    }
+
+    // Reactions
+    let reactionsHtml = '';
+    const reactions = p.reactions || {};
+    if (Object.keys(reactions).length > 0) {
+        reactionsHtml = '<div class="channel-post-reactions">';
+        for (const emoji in reactions) {
+            const users = reactions[emoji] || [];
+            if (users.length === 0) continue;
+            const reacted = users.includes(userId);
+            reactionsHtml += `<button class="channel-react-btn ${reacted ? 'reacted' : ''}" onclick="reactTo('${emoji}', ${p.id})">${emoji} <span class="count">${users.length}</span></button>`;
+        }
+        reactionsHtml += `<button class="channel-add-react" onclick="openReactionPicker(${p.id})"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button>`;
+        reactionsHtml += '</div>';
+    } else {
+        reactionsHtml = `<div class="channel-post-reactions"><button class="channel-add-react" onclick="openReactionPicker(${p.id})"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></button></div>`;
+    }
+
+    return `<div class="channel-post" data-post-id="${p.id}">
+        <div class="channel-post-header">
+            <div style="font-size:12px;color:#8800ff;font-weight:600;">${p.authorName || 'Admin'}</div>
+            <div class="channel-post-time">${p.date} • ${p.time}</div>
+        </div>
+        <div class="channel-post-content">${content}</div>
+        ${reactionsHtml}
+        ${isAdmin ? `<div style="margin-top:10px;text-align:right;"><button onclick="openPostOptions(${p.id})" style="background:transparent;color:#8888bb;border:none;cursor:pointer;font-size:11px;padding:4px 8px;">⋮ Options</button></div>` : ''}
+    </div>`;
+}
+
+function formatText(text) {
+    if (!text) return '';
+    let html = text;
+    html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    html = html.replace(/\*([^*\n]+)\*/g, '<b>$1</b>');
+    html = html.replace(/_([^_\n]+)_/g, '<i>$1</i>');
+    html = html.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#00aaff;">$1</a>');
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+function toggleFollowChannel() {
+    ChatsStorage.toggleFollowChannel(channelId);
+    renderChannel();
+    alert(ChatsStorage.isFollowing(channelId) ? 'Following channel' : 'Unfollowed');
+}
+
+function toggleChannelMenu() {
+    document.getElementById('channelMenu').classList.toggle('show');
+}
+
+function toggleMuteChannel() {
+    document.getElementById('channelMenu').classList.remove('show');
+    channel = ChatsStorage.getChannel(channelId);
+    ChatsStorage.updateChannel(channelId, { muted: !channel.muted });
+    alert(channel.muted ? 'Channel unmuted' : 'Channel muted');
+    renderChannel();
+}
+
+function shareChannel() {
+    document.getElementById('channelMenu').classList.remove('show');
+    const url = window.location.origin + window.location.pathname.replace('channel.html', 'channel.html?id=' + channelId);
+    if (navigator.share) {
+        navigator.share({ title: channel.name, url: url }).catch(() => {});
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => alert('Link copied!')).catch(() => alert(url));
+    } else {
+        alert('Channel: ' + channel.name + '\nURL: ' + url);
+    }
+}
+
+function openAddPost() {
+    if (!isAdmin) { alert('Only admins can post'); return; }
+    selectedPostImage = null;
+    document.getElementById('postText').value = '';
+    document.getElementById('postImageName').textContent = '';
+    document.getElementById('addPostModal').classList.add('show');
+}
+
+function submitPost() {
+    const text = document.getElementById('postText').value.trim();
+    if (!text && !selectedPostImage) { alert('Please write something or add image'); return; }
+
+    let type = 'text';
+    let extra = {};
+    if (selectedPostImage) {
+        type = 'image';
+        extra = { fileData: selectedPostImage };
+    }
+
+    ChatsStorage.addChannelPost(channelId, text, type, extra);
+    closeModal('addPostModal');
+    renderChannel();
+    alert('Posted!');
+}
+
+function openReactionPicker(postId) {
+    reactionTargetPostId = postId;
+    document.getElementById('reactionPickerModal').classList.add('show');
+}
+
+function pickReaction(emoji) {
+    if (!reactionTargetPostId) return;
+    ChatsStorage.reactToPost(channelId, reactionTargetPostId, emoji);
+    closeModal('reactionPickerModal');
+    reactionTargetPostId = null;
+    renderChannel();
+}
+
+function reactTo(emoji, postId) {
+    ChatsStorage.reactToPost(channelId, postId, emoji);
+    renderChannel();
+}
+
+function openPostOptions(postId) {
+    postOptionsTargetId = postId;
+    document.getElementById('postOptionsModal').classList.add('show');
+}
+
+function deleteCurrentPost() {
+    if (!postOptionsTargetId) return;
+    if (!confirm('Delete this post?')) return;
+    ChatsStorage.deleteChannelPost(channelId, postOptionsTargetId);
+    closeModal('postOptionsModal');
+    postOptionsTargetId = null;
+    renderChannel();
+}
+
+function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('show');
+}
+
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('channelMenu');
+    if (menu && !e.target.closest('.app-bar')) menu.classList.remove('show');
+});
+</script>
+</body>
+</html>

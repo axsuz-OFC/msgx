@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Channels - MsGX</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-bar">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:#b0b0d0;"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+    </a>
+    <h1>Channels</h1>
+    <div class="app-bar-actions">
+        <button onclick="showDiscover()">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </button>
+    </div>
+</header>
+
+<div class="tabs">
+    <button class="tab" onclick="window.location.href='index.html'">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        Chats
+    </button>
+    <button class="tab active">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.94.98 1.6 2.54 1.6 1.44 0 2.15-.68 2.15-1.48 0-.84-.53-1.31-2.31-1.71-2.31-.51-3.79-1.34-3.79-3.2 0-1.51 1.16-2.5 2.72-2.81V6.6h2.67v1.52c1.49.31 2.72 1.28 2.88 2.98h-1.96c-.12-.85-.76-1.41-2.14-1.41-1.18 0-1.79.52-1.79 1.24 0 .75.62 1.13 2.4 1.55 2.28.55 3.7 1.35 3.7 3.32 0 1.7-1.28 2.68-2.9 3z"/></svg>
+        Channels
+    </button>
+    <button class="tab" onclick="window.location.href='status.html'">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+        Status
+    </button>
+</div>
+
+<main class="container">
+    <div id="channelsList"></div>
+</main>
+
+<button class="channel-fab" onclick="openCreateChannel()">
+    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</button>
+
+<div class="modal" id="createChannelModal">
+    <div class="modal-content">
+        <h2>Create Channel</h2>
+        <div style="text-align:center;margin-bottom:15px;">
+            <div class="channel-view-avatar" id="newChannelAvatar" style="width:80px;height:80px;font-size:32px;cursor:pointer;" onclick="document.getElementById('channelPhotoInput').click()">C</div>
+            <p style="color:#8888bb;font-size:11px;margin-top:8px;">Tap to add photo</p>
+        </div>
+        <input type="text" id="newChannelName" placeholder="Channel name">
+        <input type="text" id="newChannelDesc" placeholder="Description (optional)">
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal('createChannelModal')">Cancel</button>
+            <button class="btn-save" onclick="createNewChannel()">Create</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="discoverModal">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <div class="discover-header">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.94.98 1.6 2.54 1.6 1.44 0 2.15-.68 2.15-1.48 0-.84-.53-1.31-2.31-1.71-2.31-.51-3.79-1.34-3.79-3.2 0-1.51 1.16-2.5 2.72-2.81V6.6h2.67v1.52c1.49.31 2.72 1.28 2.88 2.98h-1.96c-.12-.85-.76-1.41-2.14-1.41-1.18 0-1.79.52-1.79 1.24 0 .75.62 1.13 2.4 1.55 2.28.55 3.7 1.35 3.7 3.32 0 1.7-1.28 2.68-2.9 3z"/></svg>
+            <h2>Discover Channels</h2>
+            <p>Follow channels you're interested in</p>
+        </div>
+        <div id="discoverList"></div>
+        <div class="modal-buttons" style="margin-top:15px;">
+            <button class="btn-cancel" onclick="closeModal('discoverModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="channelPhotoInput" accept="image/*" style="display:none;">
+
+<script src="js/chats.js"></script>
+<script>
+let selectedChannelPhoto = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    loadGlobalWallpaper();
+    renderChannels();
+});
+
+document.getElementById('channelPhotoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        selectedChannelPhoto = ev.target.result;
+        const av = document.getElementById('newChannelAvatar');
+        av.style.backgroundImage = `url(${selectedChannelPhoto})`;
+        av.style.backgroundSize = 'cover';
+        av.style.backgroundPosition = 'center';
+        av.textContent = '';
+    };
+    reader.readAsDataURL(file);
+});
+
+function renderChannels() {
+    const list = document.getElementById('channelsList');
+    const channels = ChatsStorage.getChannels();
+    const user = ChatsStorage.getCurrentUser();
+    const userId = user ? user.id : 'guest';
+
+    const following = channels.filter(c => (c.followers || []).includes(userId));
+    const myChannels = channels.filter(c => (c.admins || []).includes(userId));
+    const followingOnly = following.filter(c => !myChannels.includes(c));
+
+    if (following.length === 0 && myChannels.length === 0) {
+        list.innerHTML = `
+            <div class="empty">
+                <div class="empty-icon">
+                    <svg viewBox="0 0 24 24" fill="#6666aa" width="70" height="70"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.94.98 1.6 2.54 1.6 1.44 0 2.15-.68 2.15-1.48 0-.84-.53-1.31-2.31-1.71-2.31-.51-3.79-1.34-3.79-3.2 0-1.51 1.16-2.5 2.72-2.81V6.6h2.67v1.52c1.49.31 2.72 1.28 2.88 2.98h-1.96c-.12-.85-.76-1.41-2.14-1.41-1.18 0-1.79.52-1.79 1.24 0 .75.62 1.13 2.4 1.55 2.28.55 3.7 1.35 3.7 3.32 0 1.7-1.28 2.68-2.9 3z"/></svg>
+                </div>
+                <p>No channels yet</p>
+                <button onclick="showDiscover()">Discover Channels</button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+
+    if (myChannels.length > 0) {
+        html += `<div class="section-divider"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>My Channels</div>`;
+        html += myChannels.map(c => renderChannelCard(c, true)).join('');
+    }
+
+    if (followingOnly.length > 0) {
+        html += `<div class="section-divider" style="margin-top:10px;">Following</div>`;
+        html += followingOnly.map(c => renderChannelCard(c, false)).join('');
+    }
+
+    list.innerHTML = html;
+}
+
+function renderChannelCard(c, isMine) {
+    const photo = ChatsStorage.getChannelPhoto(c.id);
+    const initial = c.name.charAt(0).toUpperCase();
+    const isFollowing = ChatsStorage.isFollowing(c.id);
+
+    let avatarContent = photo ? `<img src="${photo}">` : initial;
+
+    return `<div class="channel-card" onclick="window.location.href='channel.html?id=${c.id}'">
+        <div class="channel-avatar">${avatarContent}</div>
+        <div class="channel-body">
+            <div class="channel-top">
+                <span class="channel-name">${c.name}</span>
+                ${c.isVerified ? '<span class="channel-verified"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>' : ''}
+            </div>
+            <div class="channel-meta">
+                <span>${(c.followers || []).length} followers</span>
+                ${isMine ? '<span style="color:#00aaff;">• Owner</span>' : ''}
+            </div>
+        </div>
+        ${!isMine ? `<button class="channel-follow-btn ${isFollowing ? 'following' : ''}" onclick="event.stopPropagation(); toggleFollow(${c.id})">${isFollowing ? 'Following' : 'Follow'}</button>` : ''}
+    </div>`;
+}
+
+function toggleFollow(channelId) {
+    ChatsStorage.toggleFollowChannel(channelId);
+    renderChannels();
+}
+
+function openCreateChannel() {
+    selectedChannelPhoto = null;
+    document.getElementById('newChannelName').value = '';
+    document.getElementById('newChannelDesc').value = '';
+    const av = document.getElementById('newChannelAvatar');
+    av.style.backgroundImage = '';
+    av.textContent = 'C';
+    document.getElementById('createChannelModal').classList.add('show');
+}
+
+function createNewChannel() {
+    const name = document.getElementById('newChannelName').value.trim();
+    const desc = document.getElementById('newChannelDesc').value.trim();
+    if (!name) { alert('Please enter channel name'); return; }
+
+    const channel = ChatsStorage.createChannel(name, desc, false);
+    if (selectedChannelPhoto) {
+        ChatsStorage.saveChannelPhoto(channel.id, selectedChannelPhoto);
+    }
+
+    closeModal('createChannelModal');
+    renderChannels();
+    alert('Channel created!');
+}
+
+function showDiscover() {
+    const channels = ChatsStorage.getChannels();
+    const list = document.getElementById('discoverList');
+    const user = ChatsStorage.getCurrentUser();
+    const userId = user ? user.id : 'guest';
+
+    // Show channels that are NOT mine
+    const others = channels.filter(c => !(c.admins || []).includes(userId));
+
+    if (others.length === 0) {
+        list.innerHTML = `
+            <p style="color:#6666aa;font-size:13px;text-align:center;padding:20px;">No other channels to discover</p>
+            <p style="color:#8888bb;font-size:11px;text-align:center;">Create a channel or wait for others to join</p>
+        `;
+    } else {
+        list.innerHTML = others.map(c => {
+            const photo = ChatsStorage.getChannelPhoto(c.id);
+            const initial = c.name.charAt(0).toUpperCase();
+            const isFollowing = ChatsStorage.isFollowing(c.id);
+            const avatar = photo ? `<img src="${photo}">` : initial;
+
+            return `<div class="channel-card" style="border-radius:12px;margin-bottom:8px;">
+                <div class="channel-avatar">${avatar}</div>
+                <div class="channel-body">
+                    <div class="channel-top">
+                        <span class="channel-name">${c.name}</span>
+                        ${c.isVerified ? '<span class="channel-verified"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>' : ''}
+                    </div>
+                    <div class="channel-meta">${(c.followers || []).length} followers</div>
+                </div>
+                <button class="channel-follow-btn ${isFollowing ? 'following' : ''}" onclick="toggleFollowFromDiscover(${c.id}, this)">${isFollowing ? 'Following' : 'Follow'}</button>
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('discoverModal').classList.add('show');
+}
+
+function toggleFollowFromDiscover(channelId, btn) {
+    const isFollowing = ChatsStorage.toggleFollowChannel(channelId);
+    btn.textContent = isFollowing ? 'Following' : 'Follow';
+    btn.classList.toggle('following', isFollowing);
+    renderChannels();
+}
+
+function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.classList.remove('show');
+}
+</script>
+</body>
+</html>
