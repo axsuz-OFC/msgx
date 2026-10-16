@@ -2,15 +2,21 @@ const ChatsStorage = {
     // ===== USERS =====
     getUsers: () => JSON.parse(localStorage.getItem('msgx_users') || '[]'),
     saveUsers: (u) => localStorage.setItem('msgx_users', JSON.stringify(u)),
+    
     registerUser: (username, email, password) => {
         const users = ChatsStorage.getUsers();
         if (users.find(u => u.email === email)) return { success: false, message: 'Email already exists!' };
         if (users.find(u => u.username === username)) return { success: false, message: 'Username already taken!' };
-        const user = { id: Date.now(), username, email, password, createdAt: new Date().toISOString() };
+        const user = { id: Date.now(), username, email, password, name: username, createdAt: new Date().toISOString() };
         users.push(user);
         ChatsStorage.saveUsers(users);
+        
+        // AUTO LOGIN after signup
+        localStorage.setItem('msgx_current_user', JSON.stringify(user));
+        
         return { success: true, user };
     },
+    
     loginUser: (email, password) => {
         const users = ChatsStorage.getUsers();
         const user = users.find(u => u.email === email && u.password === password);
@@ -20,9 +26,20 @@ const ChatsStorage = {
         }
         return { success: false, message: 'Invalid email or password!' };
     },
-    logoutUser: () => localStorage.removeItem('msgx_current_user'),
+    
+    logoutUser: () => {
+        localStorage.removeItem('msgx_current_user');
+    },
+    
     getCurrentUser: () => JSON.parse(localStorage.getItem('msgx_current_user') || 'null'),
-    isLoggedIn: () => !!localStorage.getItem('msgx_current_user'),
+    
+    isLoggedIn: () => {
+        // Test mode: ?test=1 තියෙනවා නම් login page එකට යන්න
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('test') === '1') return false;
+        
+        return !!localStorage.getItem('msgx_current_user');
+    },
 
     // ===== CONTACTS =====
     getContacts: () => JSON.parse(localStorage.getItem('msgx_contacts') || '[]'),
@@ -303,7 +320,6 @@ const ChatsStorage = {
         channels[idx].admins = (channels[idx].admins || []).filter(a => a !== userId);
         ChatsStorage.saveChannels(channels);
     },
-    // Channel posts
     getChannelPosts: (channelId) => JSON.parse(localStorage.getItem('msgx_channel_posts_' + channelId) || '[]'),
     saveChannelPosts: (channelId, posts) => localStorage.setItem('msgx_channel_posts_' + channelId, JSON.stringify(posts)),
     addChannelPost: (channelId, text, type = 'text', extra = {}) => {
