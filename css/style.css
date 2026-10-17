@@ -3104,3 +3104,152 @@ body.light-theme .channel-react-btn {
 body.light-theme .admin-list-item {
     background: rgba(0,0,0,0.05);
 }
+/* =========================================
+   MsGX PREMIUM UPGRADE (Add at the bottom)
+========================================= */
+
+/* 1. Purple + Blue Running Animation (Main Colors) */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body {
+    background: #0a0a1a;
+    /* මේකෙන් ඔයාගේ පරණ background එකට අලුත් animation එකක් එකතු වෙනවා */
+    background-image: radial-gradient(circle at 50% 50%, rgba(136,0,255,0.1), transparent 60%);
+}
+
+/* 2. App Bar & Title Premium Look */
+.app-bar h1, .splash-name {
+    background: linear-gradient(90deg, #8800ff, #00aaff, #8800ff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientBG 3s linear infinite;
+    font-weight: 800;
+}
+
+/* 3. Status "+" Neon Icon (මැදට, ලොකුවට) */
+@keyframes neonGlow {
+    0%, 100% { box-shadow: 0 0 10px #8800ff, 0 0 20px #00aaff; }
+    50% { box-shadow: 0 0 20px #00aaff, 0 0 40px #8800ff; }
+}
+
+.status-add-btn {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #8800ff, #00aaff) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    animation: neonGlow 2s infinite !important;
+    cursor: pointer !important;
+    border: 3px solid rgba(255,255,255,0.2) !important;
+    margin: 40px auto !important;
+}
+
+.status-add-btn svg {
+    width: 38px !important;
+    height: 38px !important;
+    fill: #fff !important;
+}
+
+/* 4. SVG Icons Only (Tabs & Bottom Nav වල අකුරු අයින් කරලා SVG විතරක් තියන්න) */
+/* ඔයාගේ app.js එකේ <span> අයින් කරලා තියෙනවා නම් මේකෙන් icon එක ලොකු වෙනවා */
+.tab {
+    padding: 12px 0 !important;
+    border-bottom: 3px solid transparent !important;
+}
+.tab svg {
+    width: 26px !important;
+    height: 26px !important;
+    fill: #6666aa !important;
+}
+.tab.active {
+    border-bottom-color: #00aaff !important;
+}
+.tab.active svg {
+    fill: #00aaff !important;
+    filter: drop-shadow(0 0 10px rgba(0,170,255,0.8)) !important;
+}
+
+.nav-item {
+    padding: 10px 20px !important;
+    border-radius: 15px !important;
+}
+.nav-item svg {
+    width: 26px !important;
+    height: 26px !important;
+    fill: #6666aa !important;
+}
+.nav-item.active {
+    background: rgba(136,0,255,0.15) !important;
+}
+.nav-item.active svg {
+    fill: #8800ff !important;
+    filter: drop-shadow(0 0 8px #8800ff) !important;
+}
+
+/* 5. Light Mode Fixes (Wallpaper, Status, Calls සහ හැම තැනම) */
+body.light-theme {
+    background: #f0f2f5 !important;
+    color: #111b21 !important;
+}
+body.light-theme .app-bar, 
+body.light-theme .tabs, 
+body.light-theme .bottom-nav, 
+body.light-theme .chat-input-bar, 
+body.light-theme .chat-view-header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(136, 0, 255, 0.2) !important;
+}
+body.light-theme .chat-item, 
+body.light-theme .settings-list, 
+body.light-theme .settings-item, 
+body.light-theme .profile-card {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(0, 0, 0, 0.05) !important;
+}
+body.light-theme .chat-name, 
+body.light-theme .settings-row-title, 
+body.light-theme .profile-name, 
+body.light-theme .section-title {
+    color: #111b21 !important;
+}
+body.light-theme .tab svg, 
+body.light-theme .nav-item svg {
+    fill: #667781 !important;
+}
+body.light-theme .tab.active svg {
+    fill: #00aaff !important;
+}
+body.light-theme .nav-item.active svg {
+    fill: #8800ff !important;
+}
+/* Wallpaper එක Light mode එකේදීත් පේන්න */
+body.light-theme::before {
+    background: rgba(240, 242, 245, 0.4) !important;
+}
+body.light-theme .msg.received {
+    background: #ffffff !important; 
+    color: #111b21 !important;
+}
+
+/* 6. Video Splash Screen */
+.splash {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #0a0a1a; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 99999; overflow: hidden;
+}
+.splash video {
+    position: absolute; top: 50%; left: 50%;
+    min-width: 100%; min-height: 100%;
+    width: auto; height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover; z-index: -1; opacity: 0.6;
+}
+.splash-content { z-index: 1; text-align: center; }
