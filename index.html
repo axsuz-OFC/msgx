@@ -87,7 +87,10 @@
 <script src="js/app.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    if (!ChatsStorage.isLoggedIn()) { window.location.href = 'login.html'; return; }
+    if (!ChatsStorage.isLoggedIn()) { 
+        window.location.href = 'login.html'; 
+        return; 
+    }
     applyTheme();
     loadGlobalWallpaper();
 });
