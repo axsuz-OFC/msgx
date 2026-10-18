@@ -3308,3 +3308,29 @@ body.light-theme .tiktok-add-btn {
     border-color: #ffffff !important;
     box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff !important;
 }
+/* =========================================
+   LARGE NEON "+" FOR TOP TABS (Status)
+========================================= */
+
+/* උඩ Tabs වල Status අයිකනය ලොකු කරන්න */
+.tabs .tab.active svg {
+    width: 34px !important;
+    height: 34px !important;
+    fill: #fff !important;
+    animation: neonGlow 2s infinite !important;
+}
+
+/* ඒ අයිකනය වටේ Neon Glow එකක් එන්න */
+.tabs .tab.active {
+    background: linear-gradient(135deg, #8800ff, #00aaff) !important;
+    border-radius: 50% !important;
+    width: 50px !important;
+    height: 50px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff !important;
+    transform: translateY(-10px) !important; /* ටිකක් උඩට ඔසවන්න */
+}
