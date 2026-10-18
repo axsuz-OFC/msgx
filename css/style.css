@@ -3253,3 +3253,58 @@ body.light-theme .msg.received {
     object-fit: cover; z-index: -1; opacity: 0.6;
 }
 .splash-content { z-index: 1; text-align: center; }
+/* =========================================
+   TIKTOK STYLE STATUS + BUTTON (Bottom Nav)
+========================================= */
+
+/* Bottom Nav එකේ අයිකන පොඩ්ඩක් උඩට ගන්නවා මැද එකට ඉඩ දෙන්න */
+.bottom-nav {
+    align-items: center; 
+    overflow: visible; /* අයිකනය උඩට යන නිසා */
+}
+
+/* TikTok Style මැද තියෙන ලොකු Neon + අයිකනය */
+.tiktok-add-btn {
+    width: 65px !important;
+    height: 65px !important;
+    background: linear-gradient(135deg, #8800ff, #00aaff) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    
+    /* මේකෙන් තමයි උඩට ඔසවන්නේ (Float Effect) */
+    transform: translateY(-20px) !important; 
+    
+    /* Neon Glow Animation */
+    box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff, inset 0 0 10px rgba(255,255,255,0.5) !important;
+    animation: tiktokPulse 2s infinite !important;
+    border: 3px solid #0a0a1a !important; /* පසුබිමේ පාටට බෝඩර් එකක් */
+    z-index: 1000 !important;
+}
+
+/* අයිකනයේ පාට සහ සයිස් එක */
+.tiktok-add-btn svg {
+    width: 34px !important;
+    height: 34px !important;
+    fill: #ffffff !important;
+}
+
+/* Neon Pulse Animation එක */
+@keyframes tiktokPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff;
+        transform: translateY(-20px) scale(1);
+    }
+    50% {
+        box-shadow: 0 0 25px #00aaff, 0 0 50px #8800ff;
+        transform: translateY(-20px) scale(1.05);
+    }
+}
+
+/* Light Mode එකේදී බෝඩර් එක සුදු පාට වෙන්න */
+body.light-theme .tiktok-add-btn {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff !important;
+}

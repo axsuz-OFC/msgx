@@ -12,6 +12,7 @@
     <h1>MsGX</h1>
 </header>
 
+<!-- Top Tabs (SVG Only) -->
 <div class="tabs">
     <button class="tab" onclick="window.location.href='index.html'">
         <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -28,26 +29,39 @@
 </div>
 
 <main class="container">
-    <!-- PREMIUM NEON "+" BUTTON -->
-    <div style="display:flex; justify-content:center; align-items:center; margin: 30px 0;">
-        <div class="status-add-btn" onclick="openAddStatus()">
-            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-        </div>
-    </div>
-    
-    <div style="text-align:center; color:#8888bb; font-size:13px; margin-bottom:30px;">Tap + to add status update</div>
-
-    <!-- Status List (කලින් තිබ්බ එක) -->
+    <!-- Status List -->
     <div class="section-title">📸 Recent Updates</div>
     <div id="statusList"></div>
 </main>
 
-<!-- ====== MODALS ====== -->
-<!-- Add Status Modal (කලින් තිබ්බ එක) -->
+<!-- ====== TIKTOK STYLE BOTTOM NAV ====== -->
+<nav class="bottom-nav" id="bottomNav">
+    <a href="index.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    </a>
+    <a href="channels.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1.94.98 1.6 2.54 1.6 1.44 0 2.15-.68 2.15-1.48 0-.84-.53-1.31-2.31-1.71-2.31-.51-3.79-1.34-3.79-3.2 0-1.51 1.16-2.5 2.72-2.81V6.6h2.67v1.52c1.49.31 2.72 1.28 2.88 2.98h-1.96c-.12-.85-.76-1.41-2.14-1.41-1.18 0-1.79.52-1.79 1.24 0 .75.62 1.13 2.4 1.55 2.28.55 3.7 1.35 3.7 3.32 0 1.7-1.28 2.68-2.9 3z"/></svg>
+    </a>
+    
+    <!-- මැද තියෙන ලොකු Neon "+" බොත්තම -->
+    <div class="nav-item tiktok-add-btn" onclick="openAddStatus()">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </div>
+
+    <a href="calls.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    </a>
+    <a href="settings.html" class="nav-item">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </a>
+</nav>
+
+<!-- ====== ADD STATUS MODAL (සම්පූර්ණයෙන්ම මෙතනට දැම්මා) ====== -->
 <div class="modal" id="addStatusModal">
     <div class="modal-content">
         <h2>Add Status</h2>
         <textarea id="statusText" placeholder="Type your status..." style="width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid rgba(136,0,255,0.3);border-radius:10px;color:#fff;font-size:15px;font-family:inherit;outline:none;margin-bottom:12px;min-height:100px;resize:vertical;"></textarea>
+        
         <p style="color:#8888bb;font-size:12px;margin-bottom:8px;">Background Color:</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px;" id="colorPicker">
             <div onclick="selectColor('#8800ff', this)" style="width:36px;height:36px;border-radius:50%;background:#8800ff;cursor:pointer;border:2px solid rgba(255,255,255,0.2);"></div>
@@ -57,6 +71,7 @@
             <div onclick="selectColor('#ff6600', this)" style="width:36px;height:36px;border-radius:50%;background:#ff6600;cursor:pointer;border:2px solid rgba(255,255,255,0.2);"></div>
             <div onclick="selectColor('#1a0033', this)" style="width:36px;height:36px;border-radius:50%;background:#1a0033;cursor:pointer;border:2px solid rgba(255,255,255,0.2);"></div>
         </div>
+        
         <div style="display:flex;gap:8px;margin-bottom:10px;">
             <input type="file" id="statusImage" accept="image/*" style="display:none;">
             <input type="file" id="statusVideo" accept="video/*" style="display:none;">
@@ -64,6 +79,7 @@
             <button onclick="document.getElementById('statusVideo').click()" style="flex:1;padding:12px;background:rgba(136,0,255,0.1);color:#8800ff;border:1px solid #8800ff;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:12px;">Video</button>
         </div>
         <p id="selectedImageName" style="color:#8800ff;font-size:11px;text-align:center;margin-bottom:10px;"></p>
+        
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="closeStatusModal()">Cancel</button>
             <button class="btn-save" onclick="saveStatus()">Post Status</button>
@@ -76,10 +92,7 @@
     <div class="modal-content" id="viewStatusContent"></div>
 </div>
 
-<nav class="bottom-nav" id="bottomNav"></nav>
-
 <script src="js/chats.js"></script>
-<script src="js/app.js"></script>
 <script>
 let selectedColor = '#8800ff';
 let selectedImage = null;
@@ -88,7 +101,6 @@ let selectedVideo = null;
 document.addEventListener('DOMContentLoaded', () => {
     applyTheme();
     loadGlobalWallpaper();
-    renderBottomNav();
     ChatsStorage.cleanExpiredStatuses();
     renderStatuses();
 
@@ -100,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (ev) => { selectedImage = ev.target.result; document.getElementById('selectedImageName').textContent = '🖼️ ' + file.name; };
         reader.readAsDataURL(file);
     });
+    
     document.getElementById('statusVideo').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -110,16 +123,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function openAddStatus() { document.getElementById('addStatusModal').classList.add('show'); document.getElementById('statusText').value = ''; document.getElementById('selectedImageName').textContent = ''; selectedImage = null; selectedVideo = null; selectedColor = '#8800ff'; }
-function closeStatusModal() { document.getElementById('addStatusModal').classList.remove('show'); }
-function selectColor(color, el) { selectedColor = color; document.querySelectorAll('#colorPicker div').forEach(d => { d.style.border = '2px solid rgba(255,255,255,0.2)'; d.style.transform = 'scale(1)'; }); el.style.border = '3px solid #fff'; el.style.transform = 'scale(1.1)'; }
+function openAddStatus() { 
+    document.getElementById('addStatusModal').classList.add('show'); 
+    document.getElementById('statusText').value = ''; 
+    document.getElementById('selectedImageName').textContent = ''; 
+    selectedImage = null; 
+    selectedVideo = null; 
+    selectedColor = '#8800ff'; 
+}
+
+function closeStatusModal() { 
+    document.getElementById('addStatusModal').classList.remove('show'); 
+}
+
+function selectColor(color, el) { 
+    selectedColor = color; 
+    document.querySelectorAll('#colorPicker div').forEach(d => { 
+        d.style.border = '2px solid rgba(255,255,255,0.2)'; 
+        d.style.transform = 'scale(1)'; 
+    }); 
+    el.style.border = '3px solid #fff'; 
+    el.style.transform = 'scale(1.1)'; 
+}
+
 function saveStatus() {
     const text = document.getElementById('statusText').value.trim();
     if (!text && !selectedImage && !selectedVideo) { alert('Please enter text, image, or video'); return; }
     if (selectedImage) ChatsStorage.addStatus('image', selectedImage, selectedColor);
     else if (selectedVideo) ChatsStorage.addStatus('video', selectedVideo, selectedColor);
     else ChatsStorage.addStatus('text', text, selectedColor);
-    closeStatusModal(); renderStatuses(); alert('Status posted!');
+    closeStatusModal(); 
+    renderStatuses(); 
+    alert('Status posted!');
 }
 
 function renderStatuses() {
