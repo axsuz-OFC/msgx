@@ -3308,3 +3308,37 @@ body.light-theme .tiktok-add-btn {
     border-color: #ffffff !important;
     box-shadow: 0 0 15px #8800ff, 0 0 30px #00aaff !important;
 }
+/* Settings Profile Avatar Fix */
+.profile-avatar-big {
+    width: 100px !important;
+    height: 100px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    background-size: cover !important;
+    background-position: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 3px solid rgba(136,0,255,0.5) !important;
+    box-shadow: 0 0 20px rgba(136,0,255,0.6) !important;
+}
+
+.profile-avatar-big img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
+
+/* Chat list avatar fix */
+.chat-avatar {
+    border-radius: 50% !important;
+    overflow: hidden !important;
+}
+
+.chat-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
